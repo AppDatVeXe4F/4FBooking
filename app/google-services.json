@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "516167605895",
+    "project_id": "fbookingticket",
+    "storage_bucket": "fbookingticket.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:516167605895:android:9df78572bc7e644ab62222",
+        "android_client_info": {
+          "package_name": "com.example.a4f"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "516167605895-btrpgsjp3fqb5rrpmponbk751108v7ti.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.a4f",
+            "certificate_hash": "da8facad458c119582fa9de557c9e6625dc5ebf1"
+          }
+        },
+        {
+          "client_id": "516167605895-c7npk5959fj5hn3h1v47kt179sd482lp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALV1SuY95vjE9U7W_xs-kbClfv3yn4Fvs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "516167605895-c7npk5959fj5hn3h1v47kt179sd482lp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

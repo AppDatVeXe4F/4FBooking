@@ -1,0 +1,9 @@
+package com.example.a4f.data
+
+import androidx.annotation.DrawableRes
+
+data class NewsItem(
+    val id: Int,
+    @DrawableRes val imageRes: Int, // Ảnh tin tức
+    val title: String
+)
