@@ -1,5 +1,6 @@
 package com.example.a4f.screens
 
+
 import android.widget.Toast // <-- THÊM
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,15 +33,18 @@ import com.example.a4f.ui.theme.LoginButtonColor
 import com.example.a4f.ui.theme.LoginScreenBackground
 import com.google.firebase.auth.FirebaseAuth // <-- THÊM
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPasswordScreen(navController: NavController) {
+
 
     var email by rememberSaveable { mutableStateOf("") }
     var emailError by rememberSaveable { mutableStateOf<String?>(null) } // Thêm biến lỗi
     var isLoading by remember { mutableStateOf(false) } // Thêm biến loading
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
+
 
     Scaffold(
         topBar = {
@@ -62,6 +66,7 @@ fun ForgotPasswordScreen(navController: NavController) {
         containerColor = LoginScreenBackground
     ) { paddingValues ->
 
+
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
@@ -72,6 +77,7 @@ fun ForgotPasswordScreen(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
+
                 Image(
                     painter = painterResource(id = R.drawable.img_login_bus),
                     contentDescription = "Forgot Password",
@@ -81,6 +87,7 @@ fun ForgotPasswordScreen(navController: NavController) {
                     contentScale = ContentScale.Fit
                 )
 
+
                 Text(
                     text = "Quên mật khẩu?",
                     fontSize = 26.sp,
@@ -89,6 +96,7 @@ fun ForgotPasswordScreen(navController: NavController) {
                     modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
                 )
 
+
                 Text(
                     text = "Đừng lo! Vui lòng nhập email, chúng tôi sẽ gửi một đường link để đặt lại mật khẩu.", // <-- Sửa text
                     fontSize = 16.sp,
@@ -96,6 +104,7 @@ fun ForgotPasswordScreen(navController: NavController) {
                     color = Color.Gray,
                     modifier = Modifier.padding(bottom = 32.dp)
                 )
+
 
                 // Ô nhập "Email"
                 OutlinedTextField(
@@ -126,7 +135,9 @@ fun ForgotPasswordScreen(navController: NavController) {
                     }
                 )
 
+
                 Spacer(modifier = Modifier.height(32.dp))
+
 
                 // Nút "Gửi link" (SỬA LẠI LOGIC)
                 Button(
@@ -158,6 +169,7 @@ fun ForgotPasswordScreen(navController: NavController) {
                 }
             }
 
+
             // Hiển thị loading
             if (isLoading) {
                 Box(
@@ -172,3 +184,6 @@ fun ForgotPasswordScreen(navController: NavController) {
         }
     }
 }
+
+
+

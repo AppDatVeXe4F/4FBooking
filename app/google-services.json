@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "516167605895",
+    "firebase_url": "https://fbookingticket-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "fbookingticket",
     "storage_bucket": "fbookingticket.firebasestorage.app"
   },

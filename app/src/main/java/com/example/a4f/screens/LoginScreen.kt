@@ -1,5 +1,6 @@
 package com.example.a4f.screens
 
+
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -46,24 +47,30 @@ import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+
 @Composable
 fun LoginScreen(navController: NavController) {
+
 
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
 
+
     val context = LocalContext.current
     val activity = context as? Activity // ✅ FIX LỖI cast LocalContext → Activity
+
 
     val auth = FirebaseAuth.getInstance()
     val coroutineScope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(false) }
+
 
     fun navigateToHome() {
         navController.navigate(AppRoutes.HOME) {
             popUpTo(navController.graph.startDestinationId) { inclusive = true }
         }
     }
+
 
     // --- Cấu hình Google Sign In ---
     val googleSignInClient = remember {
@@ -73,6 +80,7 @@ fun LoginScreen(navController: NavController) {
             .build()
         GoogleSignIn.getClient(context, gso)
     }
+
 
     // --- Xử lý kết quả đăng nhập Google ---
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -84,6 +92,7 @@ fun LoginScreen(navController: NavController) {
                 val account = task.getResult(ApiException::class.java)!!
                 val idToken = account.idToken!!
                 val credential = GoogleAuthProvider.getCredential(idToken, null)
+
 
                 coroutineScope.launch {
                     try {
@@ -106,6 +115,7 @@ fun LoginScreen(navController: NavController) {
         }
     }
 
+
     // --- Giao diện ---
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -125,6 +135,7 @@ fun LoginScreen(navController: NavController) {
                 contentScale = ContentScale.Fit
             )
 
+
             Text(
                 text = "Xin Chào, Quý Khách!",
                 fontSize = 22.sp,
@@ -132,6 +143,7 @@ fun LoginScreen(navController: NavController) {
                 color = LoginButtonColor,
                 modifier = Modifier.padding(top = 16.dp, bottom = 32.dp)
             )
+
 
             // Email input
             Text(
@@ -160,7 +172,9 @@ fun LoginScreen(navController: NavController) {
                 shape = RoundedCornerShape(16.dp)
             )
 
+
             Spacer(modifier = Modifier.height(16.dp))
+
 
             // Password input
             Text(
@@ -188,6 +202,7 @@ fun LoginScreen(navController: NavController) {
                 shape = RoundedCornerShape(16.dp)
             )
 
+
             TextButton(
                 onClick = { navController.navigate(AppRoutes.FORGOT_PASSWORD) },
                 modifier = Modifier.align(Alignment.End)
@@ -195,7 +210,9 @@ fun LoginScreen(navController: NavController) {
                 Text(text = "Quên mật khẩu?", color = Color.Gray)
             }
 
+
             Spacer(modifier = Modifier.height(16.dp))
+
 
             // Nút đăng nhập Email/Password
             Button(
@@ -225,11 +242,14 @@ fun LoginScreen(navController: NavController) {
                 Text(text = "Đăng nhập", fontSize = 18.sp, color = Color.White)
             }
 
+
             Spacer(modifier = Modifier.height(32.dp))
+
 
             // Social login
             Text(text = "Or continue with", color = Color.Gray)
             Spacer(modifier = Modifier.height(16.dp))
+
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -259,7 +279,9 @@ fun LoginScreen(navController: NavController) {
                     )
                 }
 
+
                 Spacer(modifier = Modifier.width(32.dp))
+
 
                 // --- Nút Ẩn danh ---
                 IconButton(
@@ -290,7 +312,9 @@ fun LoginScreen(navController: NavController) {
                 }
             }
 
+
             Spacer(modifier = Modifier.height(32.dp))
+
 
             // --- Nút Đăng ký ---
             TextButton(
@@ -299,8 +323,10 @@ fun LoginScreen(navController: NavController) {
                 Text(text = "Bạn chưa có tài khoản !!", color = LoginButtonColor)
             }
 
+
             Spacer(modifier = Modifier.height(32.dp))
         }
+
 
         if (isLoading) {
             Box(
@@ -314,3 +340,6 @@ fun LoginScreen(navController: NavController) {
         }
     }
 }
+
+
+

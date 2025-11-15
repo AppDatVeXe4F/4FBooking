@@ -1,6 +1,8 @@
 package com.example.a4f.data
 
+
 import androidx.annotation.DrawableRes
+
 
 data class DealItem(
     val id: Int,
@@ -8,3 +10,4 @@ data class DealItem(
     val title: String,
     val description: String
 )
+

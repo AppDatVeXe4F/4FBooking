@@ -1,5 +1,6 @@
 package com.example.a4f.screens
 
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -27,12 +28,15 @@ import com.example.a4f.navigation.AppRoutes
 import com.example.a4f.ui.theme.AppBackgroundColor // Import màu nền xanh
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(navController: NavController) {
 
+
     val pagerState = rememberPagerState(pageCount = { 2 })
     val scope = rememberCoroutineScope()
+
 
     // Hàm xử lý khi nhấn nút "Next"
     val onNextClick = {
@@ -49,12 +53,14 @@ fun OnboardingScreen(navController: NavController) {
         }
     }
 
+
     // Hàm xử lý khi nhấn "Skip"
     val onSkipClick = {
         navController.navigate(AppRoutes.LOGIN) {
             popUpTo(AppRoutes.ONBOARDING) { inclusive = true }
         }
     }
+
 
     Box(
         modifier = Modifier
@@ -81,6 +87,7 @@ fun OnboardingScreen(navController: NavController) {
             }
         }
 
+
         // 3. Thanh điều khiển ở dưới (Skip, Dots, Next)
         BottomControls(
             modifier = Modifier
@@ -93,6 +100,7 @@ fun OnboardingScreen(navController: NavController) {
         )
     }
 }
+
 
 // Composable riêng cho thanh điều khiển
 @OptIn(ExperimentalFoundationApi::class)
@@ -114,6 +122,7 @@ private fun BottomControls(
             Text(text = "Skip", color = Color.White.copy(alpha = 0.7f))
         }
 
+
         // 2. Dấu chấm (Indicator)
         MyPagerIndicator(
             pagerState = pagerState,
@@ -121,6 +130,7 @@ private fun BottomControls(
             activeColor = Color.White, // Màu chấm (trang hiện tại)
             inactiveColor = Color.White.copy(alpha = 0.3f) // Màu chấm (trang khác)
         )
+
 
         // 3. Nút "Next" (hình tròn)
         IconButton(
@@ -137,6 +147,7 @@ private fun BottomControls(
         }
     }
 }
+
 
 // Composable cho Dấu chấm (Indicator) - đã cập nhật
 @OptIn(ExperimentalFoundationApi::class)
@@ -157,6 +168,7 @@ fun MyPagerIndicator(
             val color = if (pagerState.currentPage == iteration) activeColor else inactiveColor
             val width = if (pagerState.currentPage == iteration) 24.dp else 8.dp // <-- Đây!
 
+
             Box(
                 modifier = Modifier
                     .padding(4.dp)
@@ -167,3 +179,6 @@ fun MyPagerIndicator(
         }
     }
 }
+
+
+

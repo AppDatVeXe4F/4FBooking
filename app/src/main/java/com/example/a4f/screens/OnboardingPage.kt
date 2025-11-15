@@ -1,5 +1,6 @@
 package com.example.a4f.screens
 
+
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 
 @Composable
 fun OnboardingPage(
@@ -48,6 +50,7 @@ fun OnboardingPage(
             )
         }
 
+
         Image(
             painter = painterResource(id = imageRes),
             contentDescription = null,
@@ -58,3 +61,6 @@ fun OnboardingPage(
         )
     }
 }
+
+
+

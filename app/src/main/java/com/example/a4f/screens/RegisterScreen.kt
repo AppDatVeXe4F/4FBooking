@@ -1,5 +1,6 @@
 package com.example.a4f.screens
 
+
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -43,6 +44,7 @@ import com.example.a4f.navigation.AppRoutes
 import com.example.a4f.ui.theme.LoginButtonColor
 import com.example.a4f.ui.theme.LoginScreenBackground
 
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -54,6 +56,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+
 // Hàm kiểm tra độ mạnh mật khẩu
 private fun isPasswordValid(password: String): Boolean {
     val hasMinLength = password.length >= 8
@@ -62,9 +65,11 @@ private fun isPasswordValid(password: String): Boolean {
     return hasMinLength && hasDigit && hasSpecialChar
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(navController: NavController) {
+
 
     // --- Biến State (Giao diện) ---
     var email by rememberSaveable { mutableStateOf("") }
@@ -72,9 +77,11 @@ fun RegisterScreen(navController: NavController) {
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
+
     var emailError by rememberSaveable { mutableStateOf<String?>(null) }
     var tenKhachHangError by rememberSaveable { mutableStateOf<String?>(null) }
     var passwordError by rememberSaveable { mutableStateOf<String?>(null) }
+
 
     // --- Biến (Logic Firebase) ---
     val context = LocalContext.current
@@ -82,12 +89,14 @@ fun RegisterScreen(navController: NavController) {
     val coroutineScope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(false) }
 
+
     // --- Hàm hỗ trợ (Cho Google/Ẩn danh) ---
     fun navigateToHome() {
         navController.navigate(AppRoutes.HOME) {
             popUpTo(navController.graph.startDestinationId) { inclusive = true }
         }
     }
+
 
     // --- Cấu hình Google Sign-In ---
     val googleSignInClient = remember {
@@ -97,6 +106,7 @@ fun RegisterScreen(navController: NavController) {
             .build()
         GoogleSignIn.getClient(context, gso)
     }
+
 
     // --- Launcher của Google ---
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -108,6 +118,7 @@ fun RegisterScreen(navController: NavController) {
                 val account = task.getResult(ApiException::class.java)!!
                 val idToken = account.idToken!!
                 val credential = GoogleAuthProvider.getCredential(idToken, null)
+
 
                 coroutineScope.launch {
                     try {
@@ -129,6 +140,7 @@ fun RegisterScreen(navController: NavController) {
             isLoading = false
         }
     }
+
 
     // --- GIAO DIỆN CHÍNH ---
     Box(modifier = Modifier.fillMaxSize()) {
@@ -152,6 +164,7 @@ fun RegisterScreen(navController: NavController) {
             containerColor = LoginScreenBackground
         ) { paddingValues ->
 
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -160,6 +173,7 @@ fun RegisterScreen(navController: NavController) {
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
 
                 Image(
                     painter = painterResource(id = R.drawable.img_register_van),
@@ -170,7 +184,9 @@ fun RegisterScreen(navController: NavController) {
                     contentScale = ContentScale.Fit
                 )
 
+
                 Spacer(modifier = Modifier.height(32.dp))
+
 
                 // Ô "Email"
                 Text(
@@ -208,7 +224,9 @@ fun RegisterScreen(navController: NavController) {
                     }
                 )
 
+
                 Spacer(modifier = Modifier.height(16.dp))
+
 
                 // Ô "Tên Khách Hàng"
                 Text(
@@ -245,7 +263,9 @@ fun RegisterScreen(navController: NavController) {
                     }
                 )
 
+
                 Spacer(modifier = Modifier.height(16.dp))
+
 
                 // Ô "Password"
                 Text(
@@ -292,7 +312,9 @@ fun RegisterScreen(navController: NavController) {
                     }
                 )
 
+
                 Spacer(modifier = Modifier.height(24.dp))
+
 
                 // --- Nút "Đăng ký" (ĐÃ SỬA LOGIC) ---
                 Button(
@@ -311,6 +333,7 @@ fun RegisterScreen(navController: NavController) {
                             isValid = false
                         }
 
+
                         if (isValid) {
                             isLoading = true
                             auth.createUserWithEmailAndPassword(email, password)
@@ -320,12 +343,14 @@ fun RegisterScreen(navController: NavController) {
                                         // TODO: Lưu 'tenKhachHang' vào Firestore
                                         Toast.makeText(context, "Đăng ký thành công! Vui lòng đăng nhập.", Toast.LENGTH_LONG).show()
 
+
                                         // --- SỬA LẠI: Chuyển về trang Login ---
                                         navController.navigate(AppRoutes.LOGIN) {
                                             popUpTo(AppRoutes.REGISTER) { inclusive = true }
                                             launchSingleTop = true
                                         }
                                         // --- HẾT SỬA ---
+
 
                                     } else {
                                         Toast.makeText(context, "Lỗi: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
@@ -342,11 +367,14 @@ fun RegisterScreen(navController: NavController) {
                     Text(text = "Đăng ký", fontSize = 18.sp, color = Color.White)
                 }
 
+
                 Spacer(modifier = Modifier.height(32.dp))
+
 
                 // --- Đăng nhập Social ---
                 Text(text = "Or sign up with", color = Color.Gray)
                 Spacer(modifier = Modifier.height(16.dp))
+
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -371,7 +399,9 @@ fun RegisterScreen(navController: NavController) {
                         )
                     }
 
+
                     Spacer(modifier = Modifier.width(32.dp))
+
 
                     // Nút Ẩn danh (Giữ nguyên logic vào Home)
                     IconButton(
@@ -405,6 +435,7 @@ fun RegisterScreen(navController: NavController) {
             }
         }
 
+
         // --- Hiển thị Loading ---
         if (isLoading) {
             Box(
@@ -418,3 +449,6 @@ fun RegisterScreen(navController: NavController) {
         }
     }
 }
+
+
+

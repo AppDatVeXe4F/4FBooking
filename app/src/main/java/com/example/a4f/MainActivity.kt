@@ -1,5 +1,6 @@
 package com.example.a4f
 
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.a4f.navigation.AppNavigation // <-- 1. Import AppNavigation
 import com.example.a4f.ui.theme._4FTheme // <-- 2. Thay A4FTheme bằng tên Theme của bạn
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,3 +27,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+
+
