@@ -1,3 +1,4 @@
+// File: app/src/main/java/com/example/a4f/data/FirestoreService.kt
 package com.example.a4f.data
 
 import com.google.firebase.Firebase
@@ -17,16 +18,15 @@ data class Trip(
     val busType: String
 )
 
-object FirebaseService {
+object FirestoreService {
     private val db: FirebaseFirestore = Firebase.firestore
 
-    // Lấy danh sách chuyến xe còn trống (khởi hành sau giờ hiện tại)
+    // LẤY DANH SÁCH CHUYẾN XE
     suspend fun getActiveTrips(): List<Trip> {
         return try {
             val snapshot = db.collection("trips").get().await()
             snapshot.documents.mapNotNull { doc ->
                 val data = doc.data ?: return@mapNotNull null
-
                 val fromRef = data["from"] as? DocumentReference ?: return@mapNotNull null
                 val toRef = data["to"] as? DocumentReference ?: return@mapNotNull null
 
@@ -46,6 +46,18 @@ object FirebaseService {
                     busType = data["busType"] as? String ?: "unknown"
                 )
             }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    // THÊM HÀM MỚI: LẤY DANH SÁCH ĐỊA ĐIỂM
+    suspend fun getLocationNames(): List<String> {
+        return try {
+            val snapshot = db.collection("locations").get().await()
+            snapshot.documents.mapNotNull { doc ->
+                doc.getString("name")
+            }.sorted() // Sắp xếp A-Z
         } catch (e: Exception) {
             emptyList()
         }

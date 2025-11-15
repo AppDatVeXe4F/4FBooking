@@ -1,5 +1,8 @@
 package com.example.a4f.screens
 
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import com.example.a4f.data.FirestoreService
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -72,9 +75,20 @@ fun HomeScreen(navController: NavController) {
     var ngayDi by rememberSaveable { mutableStateOf("28,Th9 2025") }
     var isSearchComplete by rememberSaveable { mutableStateOf(false) }
 
+    var locations by remember { mutableStateOf<List<String>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+
     val datePickerState = rememberDatePickerState()
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var selectedBottomItem by remember { mutableStateOf(0) }
+
+    // DÙNG FIRESTORE THAY REALTIME DB
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            locations = FirestoreService.getLocationNames()
+        }
+        isLoading = false
+    }
 
     Scaffold(
         topBar = { HomeTopAppBar() },
@@ -123,6 +137,8 @@ fun HomeScreen(navController: NavController) {
                     onDiemDenChange = { diemDen = it },
                     ngayDi = ngayDi,
                     onNgayDiClick = { showDatePicker = true },
+                    locations = locations,        // ĐÃ THÊM
+                    isLoading = isLoading,        // ĐÃ THÊM
                     navController = navController,
                     onSearchComplete = { isSearchComplete = true }
                 )
@@ -189,6 +205,8 @@ fun SearchSection(
     onDiemDenChange: (String) -> Unit,
     ngayDi: String,
     onNgayDiClick: () -> Unit,
+    locations: List<String>,      // ĐÃ THÊM
+    isLoading: Boolean,           // ĐÃ THÊM
     navController: NavController,
     onSearchComplete: () -> Unit
 ) {
