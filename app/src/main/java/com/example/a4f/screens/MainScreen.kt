@@ -1,113 +1,80 @@
-// trong com/example/a4f/screens/MainScreen.kt
-
-
+// com/example/a4f/screens/MainScreen.kt
 package com.example.a4f.screens
 
-
-import android.annotation.SuppressLint
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.example.a4f.navigation.BottomNavItem
+import com.example.a4f.screens.booking.FindTripScreen
 
-
-// (Bạn sẽ cần tạo các file này ở Bước 4)
-// import com.example.a4f.screens.tabs.BookingScreen
-// import com.example.a4f.screens.tabs.MyTicketsScreen
-// import com.example.a4f.screens.tabs.ProfileScreen
-
-
-
-
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
-    val bottomNavController = rememberNavController() // NavController cho các tab
+fun MainScreen(navController: NavHostController) {
 
-
-    val screens = listOf(
+    val bottomNavItems = listOf(
         BottomNavItem.Home,
         BottomNavItem.Booking,
         BottomNavItem.MyTickets,
         BottomNavItem.Profile
     )
 
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val showBottomBar = currentRoute in bottomNavItems.map { it.route }
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-
-
-                screens.forEach { screen ->
-                    NavigationBarItem(
-                        icon = { Icon(screen.icon, contentDescription = screen.title) },
-                        label = { Text(screen.title) },
-                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                        onClick = {
-                            bottomNavController.navigate(screen.route) {
-                                // Pop up to the start destination to avoid building up a large stack
-                                popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                    saveState = true
+            if (showBottomBar) {
+                NavigationBar {
+                    bottomNavItems.forEach { item ->
+                        NavigationBarItem(
+                            selected = currentRoute == item.route,
+                            onClick = {
+                                if (currentRoute != item.route) {
+                                    navController.navigate(item.route) {
+                                        popUpTo(navController.graph.startDestinationId)
+                                        launchSingleTop = true
+                                    }
                                 }
-                                // Avoid re-launching the same destination
-                                launchSingleTop = true
-                                // Restore state when re-selecting
-                                restoreState = true
-                            }
-                        }
-                    )
+                            },
+                            icon = { Icon(item.icon, contentDescription = null) },
+                            label = { Text(item.title) }
+                        )
+                    }
                 }
             }
         }
     ) { innerPadding ->
-        // NavHost nội bộ cho 4 màn hình chính
-        NavHost(
-            navController = bottomNavController,
-            startDestination = BottomNavItem.Home.route,
-            //modifier = Modifier.padding(innerPadding) // Thêm padding nếu cần
-        ) {
-            // 1. Trang chủ (dùng lại HomeScreen bạn đã tạo)
-            composable(BottomNavItem.Home.route) {
-                HomeScreen(navController = bottomNavController) // Dùng lại HomeScreen của bạn
-            }
+        Box(modifier = Modifier.padding(innerPadding)) {
+            when (currentRoute) {
+                BottomNavItem.Home.route -> HomeScreen(navController = navController)
 
+                // TAB "ĐẶT VÉ" → ĐỂ TRỐNG HOÀN TOÀN (KHÔNG HIỂN THỊ GÌ HẾT)
+                BottomNavItem.Booking.route -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Bấm 'Đi thôi!!!!' để đặt vé", fontSize = 18.sp, color = Color.Gray)
+                    }
+                }
 
-            // 2. Đặt vé
-            composable(BottomNavItem.Booking.route) {
-                BookingScreen(mainNavController = bottomNavController, paddingValues = innerPadding)
-            }
+                BottomNavItem.MyTickets.route -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Vé của tôi", fontSize = 20.sp)
+                    }
+                }
 
-
-            // 3. Vé của tôi
-            composable(BottomNavItem.MyTickets.route) {
-                // MyTicketsScreen(navController = bottomNavController)
-                Text("Màn hình Vé Của Tôi") // Placeholder
-            }
-
-
-            // 4. Cá nhân
-            composable(BottomNavItem.Profile.route) {
-                // ProfileScreen(navController = bottomNavController)
-                Text("Màn hình Cá Nhân") // Placeholder
+                BottomNavItem.Profile.route -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Cá nhân", fontSize = 20.sp)
+                    }
+                }
             }
         }
     }
 }
-
-
-

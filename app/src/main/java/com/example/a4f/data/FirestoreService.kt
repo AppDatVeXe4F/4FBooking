@@ -51,14 +51,24 @@ object FirestoreService {
         }
     }
 
-    // THÊM HÀM MỚI: LẤY DANH SÁCH ĐỊA ĐIỂM
+    //  LẤY DANH SÁCH ĐỊA ĐIỂM
     suspend fun getLocationNames(): List<String> {
         return try {
             val snapshot = db.collection("locations").get().await()
-            snapshot.documents.mapNotNull { doc ->
-                doc.getString("name")
-            }.sorted() // Sắp xếp A-Z
+            val result = mutableListOf<String>()
+
+            for (doc in snapshot.documents) {
+                val name = doc.getString("name")
+                println("DEBUG: Document ${doc.id} - name = '$name'") // LOG TỪNG DOCUMENT
+                if (name != null && name.isNotBlank()) {
+                    result.add(name.trim())
+                }
+            }
+
+            println("DEBUG: Final locations = $result")
+            result.sorted()
         } catch (e: Exception) {
+            println("ERROR: Failed to load locations: $e")
             emptyList()
         }
     }

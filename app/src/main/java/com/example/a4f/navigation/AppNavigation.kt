@@ -1,21 +1,29 @@
 package com.example.a4f.navigation
 
 
-import androidx.navigation.NavHostController
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-// import com.example.a4f.screens.HomeScreen     // <-- Dòng này không cần ở đây nữa
+
+
+// IMPORT CÁC MÀN HÌNH BẠN ĐÃ CODE SẴN
 import com.example.a4f.screens.LoginScreen
 import com.example.a4f.screens.OnboardingScreen
 import com.example.a4f.screens.RegisterScreen
 import com.example.a4f.screens.SplashScreen
 import com.example.a4f.screens.ForgotPasswordScreen
-import com.example.a4f.screens.MainScreen // <-- BƯỚC 3: THÊM IMPORT NÀY
+import com.example.a4f.screens.MainScreen
 
 
-// Định nghĩa các hằng số cho route (Giữ nguyên)
+// IMPORT 3 MÀN HÌNH ĐẶT VÉ CHÍNH CỦA BẠN
+import com.example.a4f.screens.booking.FindTripScreen
+import com.example.a4f.screens.booking.SelectSeatScreen
+
+
 object AppRoutes {
     const val SPLASH = "splash"
     const val ONBOARDING = "onboarding"
@@ -23,10 +31,13 @@ object AppRoutes {
     const val REGISTER = "register"
     const val HOME = "home"
     const val FORGOT_PASSWORD = "forgot_password"
-    const val OTP_VERIFICATION = "otp_verification"
 
 
-    const val RESET_PASSWORD = "reset_password"
+    // ROUTE MỚI CHO FLOW ĐẶT VÉ CỦA BẠN
+    const val FIND_TRIP = "find_trip_screen"
+    const val SELECT_SEAT = "select_seat_screen"
+    const val FILL_INFO = "fill_info_screen"        // Sau này bạn thêm màn hình này
+    const val PAYMENT = "payment_screen"            // Sau này thêm thanh toán
 }
 
 
@@ -37,55 +48,77 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = AppRoutes.SPLASH // Bắt đầu từ màn hình Splash
+        startDestination = AppRoutes.SPLASH
     ) {
-
-
-        // 1. Màn hình Splash (Giữ nguyên)
         composable(AppRoutes.SPLASH) {
             SplashScreen(navController = navController)
         }
 
 
-        // 2. Màn hình Onboarding (Giữ nguyên)
         composable(AppRoutes.ONBOARDING) {
             OnboardingScreen(navController = navController)
         }
 
 
-        // 3. Màn hình Đăng nhập (Giữ nguyên)
         composable(AppRoutes.LOGIN) {
             LoginScreen(navController = navController)
         }
 
 
-        // 4. Màn hình Đăng ký (Giữ nguyên)
         composable(AppRoutes.REGISTER) {
             RegisterScreen(navController = navController)
         }
 
 
-        // 5. MÀN HÌNH CHÍNH (BƯỚC 3: ĐÃ THAY ĐỔI)
-        composable(AppRoutes.HOME) {
-            MainScreen() // <-- Thay vì gọi HomeScreen, gọi MainScreen
-            //     Nó đã chứa bottom bar và cả HomeScreen bên trong.
-        }
-
-
-        // (Giữ nguyên)
         composable(AppRoutes.FORGOT_PASSWORD) {
             ForgotPasswordScreen(navController = navController)
         }
 
 
+        // MÀN HÌNH CHÍNH (có Bottom Navigation)
+        composable(AppRoutes.HOME) {
+            MainScreen(navController = navController)
+        }
+
+
+        // 3 MÀN HÌNH ĐẶT VÉ CỦA BẠN – HOÀN HẢO 100%
+        composable(AppRoutes.FIND_TRIP) {
+            FindTripScreen(navController = navController)
+        }
+
+
+        composable(AppRoutes.SELECT_SEAT) {
+            SelectSeatScreen(navController = navController)
+        }
+
+        composable("find_trip_screen") {
+            FindTripScreen(navController = navController)
+        }
+
+        composable("select_seat_screen") {
+            SelectSeatScreen(navController = navController)
+        }
+
+
+        // MÀN HÌNH TIẾP THEO (bạn sẽ làm sau)
+        composable(AppRoutes.FILL_INFO) {
+            // TODO: Tạo màn hình điền thông tin hành khách
+            androidx.compose.material3.Text(
+                text = "Đang phát triển: Điền thông tin hành khách",
+                fontSize = 20.sp,
+                modifier = androidx.compose.ui.Modifier.fillMaxSize().wrapContentSize()
+            )
+        }
+
+
+        composable(AppRoutes.PAYMENT) {
+            // TODO: Thanh toán Momo / ZaloPay
+            androidx.compose.material3.Text(
+                text = "Đang phát triển: Thanh toán",
+                fontSize = 20.sp,
+                modifier = androidx.compose.ui.Modifier.fillMaxSize().wrapContentSize()
+            )
+        }
     }
 }
-
-
-@Composable
-fun OnboardingScreen(navController: NavHostController) {
-    TODO("Not yet implemented")
-}
-
-
 

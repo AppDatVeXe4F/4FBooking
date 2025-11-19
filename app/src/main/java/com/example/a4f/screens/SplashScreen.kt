@@ -1,6 +1,8 @@
 package com.example.a4f.screens
 
 
+
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -19,8 +21,12 @@ import com.example.a4f.ui.theme.AppBackgroundColor
 import kotlinx.coroutines.delay
 
 
+
+
 @Composable
 fun SplashScreen(navController: NavController) {
+
+
 
 
     LaunchedEffect(key1 = true) {
@@ -46,6 +52,3 @@ fun SplashScreen(navController: NavController) {
         )
     }
 }
-
-
-

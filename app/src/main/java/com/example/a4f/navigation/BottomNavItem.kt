@@ -1,12 +1,16 @@
 package com.example.a4f.navigation
 
 
+
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
+
+
 
 
 // Định nghĩa các đối tượng cho Bottom Navigation
@@ -16,10 +20,12 @@ sealed class BottomNavItem(
     val icon: ImageVector
 ) {
     object Home : BottomNavItem(
-        route = "home_tab",
-        title = "Trang chủ",
-        icon = Icons.Default.Home
-    )
+        route = AppRoutes.HOME,
+        title = "Trang chủ",        // ← Chỉ để 1 lần ở đây
+        icon = Icons.Default.Home,
+
+
+        )
     object Booking : BottomNavItem(
         route = "booking_tab",
         title = "Đặt vé",
@@ -36,6 +42,10 @@ sealed class BottomNavItem(
         icon = Icons.Default.AccountCircle
     )
 }
+
+
+
+
 
 
 

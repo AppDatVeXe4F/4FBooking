@@ -4,6 +4,8 @@
 package com.example.a4f.screens
 
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -71,9 +73,11 @@ fun BookingScreen(
         NavHost(
             navController = bookingFlowNavController,
             startDestination = BookingRoutes.FIND_TRIP,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            // THÊM DÒNG NÀY ĐỂ RESET VỀ MÀN ĐẦU KHI VÀO LẠI TAB
+            enterTransition = { fadeIn() },
+            exitTransition = { fadeOut() }
         ) {
-            // Màn 1
             composable(BookingRoutes.FIND_TRIP) {
                 FindTripScreen(navController = bookingFlowNavController)
             }
@@ -102,6 +106,4 @@ fun BookingScreen(
         } // <-- Dấu } của NavHost
     } // <-- Dấu } của Column
 } // <-- Dấu } của fun BookingScreen
-
-
 

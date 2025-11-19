@@ -207,5 +207,3 @@ fun StepDot(isActive: Boolean, activeColor: Color, inactiveColor: Color) {
     )
 }
 
-
-
