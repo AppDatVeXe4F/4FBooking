@@ -270,7 +270,7 @@ fun SearchSection(
     }
 }
 
-// ... (Giữ nguyên phần còn lại của file) ...
+
 @Composable
 fun SmallSearchInput(modifier: Modifier = Modifier, icon: ImageVector?, text: String, onClick: () -> Unit) {
     Row(

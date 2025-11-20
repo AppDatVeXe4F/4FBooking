@@ -1,12 +1,7 @@
 package com.example.a4f.screens
 
 
-
-
-import android.app.Activity
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -45,33 +40,20 @@ import com.example.a4f.R
 import com.example.a4f.navigation.AppRoutes
 import com.example.a4f.ui.theme.LoginButtonColor
 import com.example.a4f.ui.theme.LoginScreenBackground
-
-
-
-
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 
-
-
-// Hàm kiểm tra độ mạnh mật khẩu
+// Kiểm tra độ mạnh mật khẩu
 private fun isPasswordValid(password: String): Boolean {
-    val hasMinLength = password.length >= 8
-    val hasDigit = password.any { it.isDigit() }
-    val hasSpecialChar = password.any { !it.isLetterOrDigit() }
-    return hasMinLength && hasDigit && hasSpecialChar
+    return password.length >= 8 &&
+            password.any { it.isDigit() } &&
+            password.any { !it.isLetterOrDigit() }
 }
-
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,94 +61,36 @@ private fun isPasswordValid(password: String): Boolean {
 fun RegisterScreen(navController: NavController) {
 
 
-
-
-    // --- Biến State (Giao diện) ---
+    // --- State giao diện ---
     var email by rememberSaveable { mutableStateOf("") }
-    var tenKhachHang by rememberSaveable { mutableStateOf("") }
+    var fullName by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
 
-
-
     var emailError by rememberSaveable { mutableStateOf<String?>(null) }
-    var tenKhachHangError by rememberSaveable { mutableStateOf<String?>(null) }
+    var fullNameError by rememberSaveable { mutableStateOf<String?>(null) }
     var passwordError by rememberSaveable { mutableStateOf<String?>(null) }
 
 
-
-
-    // --- Biến (Logic Firebase) ---
+    // --- State logic ---
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
     val coroutineScope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(false) }
 
 
-
-
-    // --- Hàm hỗ trợ (Cho Google/Ẩn danh) ---
+    // Điều hướng về Home khi đã đăng nhập thành công
     fun navigateToHome() {
         navController.navigate(AppRoutes.HOME) {
             popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            launchSingleTop = true
         }
     }
 
 
-
-
-    // --- Cấu hình Google Sign-In ---
-    val googleSignInClient = remember {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
-        GoogleSignIn.getClient(context, gso)
-    }
-
-
-
-
-    // --- Launcher của Google ---
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(ApiException::class.java)!!
-                val idToken = account.idToken!!
-                val credential = GoogleAuthProvider.getCredential(idToken, null)
-
-
-
-
-                coroutineScope.launch {
-                    try {
-                        isLoading = true
-                        auth.signInWithCredential(credential).await()
-                        Toast.makeText(context, "Đăng nhập Google thành công", Toast.LENGTH_SHORT).show()
-                        navigateToHome() // Đăng nhập Google vào thẳng Home
-                    } catch (e: Exception) {
-                        Toast.makeText(context, "Lỗi: ${e.message}", Toast.LENGTH_SHORT).show()
-                    } finally {
-                        isLoading = false
-                    }
-                }
-            } catch (e: ApiException) {
-                isLoading = false
-                Toast.makeText(context, "Đăng nhập Google thất bại: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            isLoading = false
-        }
-    }
-
-
-
-
-    // --- GIAO DIỆN CHÍNH ---
+    // --- GIAO DIỆN ---
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             topBar = {
@@ -174,23 +98,14 @@ fun RegisterScreen(navController: NavController) {
                     title = { },
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Quay lại"
-                            )
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Quay lại")
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    )
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 )
             },
             containerColor = LoginScreenBackground
         ) { paddingValues ->
-
-
-
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -201,277 +116,236 @@ fun RegisterScreen(navController: NavController) {
             ) {
 
 
-
-
                 Image(
                     painter = painterResource(id = R.drawable.img_register_van),
-                    contentDescription = "Register Van",
+                    contentDescription = "Register Illustration",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 0.dp, start = 16.dp, end = 16.dp),
+                        .padding(top = 16.dp),
                     contentScale = ContentScale.Fit
                 )
 
 
-
-
                 Spacer(modifier = Modifier.height(32.dp))
 
 
-
-
-                // Ô "Email"
-                Text(
-                    text = "Email",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Start,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.DarkGray
-                )
+                // Email
+                Text("Email", fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = email,
-                    onValueChange = {
-                        email = it
-                        emailError = null
-                    },
+                    onValueChange = { email = it; emailError = null },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("yourname@gmail.com") },
-                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                    leadingIcon = { Icon(Icons.Default.Email, null) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    shape = RoundedCornerShape(16.dp),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
-                        disabledContainerColor = Color.White,
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
                     ),
-                    shape = RoundedCornerShape(16.dp),
                     isError = emailError != null,
-                    supportingText = {
-                        if (emailError != null) {
-                            Text(text = emailError!!, color = MaterialTheme.colorScheme.error)
-                        }
-                    }
+                    supportingText = { emailError?.let { Text(it, color = MaterialTheme.colorScheme.error) } }
                 )
-
-
 
 
                 Spacer(modifier = Modifier.height(16.dp))
 
 
-
-
-                // Ô "Tên Khách Hàng"
-                Text(
-                    text = "Tên Khách Hàng",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Start,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.DarkGray
-                )
+                // Họ và tên
+                Text("Họ và tên", fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = tenKhachHang,
-                    onValueChange = {
-                        tenKhachHang = it
-                        tenKhachHangError = null
-                    },
+                    value = fullName,
+                    onValueChange = { fullName = it; fullNameError = null },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Họ và Tên") },
-                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    placeholder = { Text("Nguyễn Văn A") },
+                    leadingIcon = { Icon(Icons.Default.Person, null) },
                     singleLine = true,
+                    shape = RoundedCornerShape(16.dp),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
-                        disabledContainerColor = Color.White,
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
                     ),
-                    shape = RoundedCornerShape(16.dp),
-                    isError = tenKhachHangError != null,
-                    supportingText = {
-                        if (tenKhachHangError != null) {
-                            Text(text = tenKhachHangError!!, color = MaterialTheme.colorScheme.error)
-                        }
-                    }
+                    isError = fullNameError != null,
+                    supportingText = { fullNameError?.let { Text(it, color = MaterialTheme.colorScheme.error) } }
                 )
-
-
 
 
                 Spacer(modifier = Modifier.height(16.dp))
 
 
-
-
-                // Ô "Password"
-                Text(
-                    text = "Password",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Start,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.DarkGray
-                )
+                // Mật khẩu
+                Text("Mật khẩu", fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = password,
-                    onValueChange = {
-                        password = it
-                        passwordError = null
-                    },
+                    onValueChange = { password = it; passwordError = null },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("•••••••••") },
-                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    placeholder = { Text("••••••••") },
+                    leadingIcon = { Icon(Icons.Default.Lock, null) },
                     singleLine = true,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     trailingIcon = {
-                        val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(imageVector = image, contentDescription = "Toggle password visibility")
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = "Hiện/Ẩn mật khẩu"
+                            )
                         }
                     },
+                    shape = RoundedCornerShape(16.dp),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
-                        disabledContainerColor = Color.White,
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
                     ),
-                    shape = RoundedCornerShape(16.dp),
                     isError = passwordError != null,
                     supportingText = {
                         if (passwordError != null) {
-                            Text(text = passwordError!!, color = MaterialTheme.colorScheme.error)
+                            Text(passwordError!!, color = MaterialTheme.colorScheme.error)
                         } else {
-                            Text(text = "Ít nhất 8 ký tự, 1 số, 1 ký tự đặc biệt.")
+                            Text("Tối thiểu 8 ký tự, có số và ký tự đặc biệt", color = Color.Gray, fontSize = 12.sp)
                         }
                     }
                 )
 
 
+                Spacer(modifier = Modifier.height(32.dp))
 
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-
-
-
-                // --- Nút "Đăng ký" (ĐÃ SỬA LOGIC) ---
+                // Nút Đăng ký (đã hoàn thiện: tạo Auth + lưu Firestore + tự động vào Home)
+                // Nút Đăng ký – PHIÊN BẢN HOÀN CHỈNH NHẤT 2025
                 Button(
                     onClick = {
+                        // Reset lỗi trước khi validate
+                        emailError = null
+                        fullNameError = null
+                        passwordError = null
+
+
                         var isValid = true
-                        if (!email.contains("@") || email.isBlank()) {
-                            emailError = "Email không hợp lệ."
+
+
+                        // Validate Email
+                        if (email.trim().isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
+                            emailError = "Vui lòng nhập email hợp lệ"
                             isValid = false
                         }
-                        if (tenKhachHang.isBlank()) {
-                            tenKhachHangError = "Vui lòng nhập họ và tên."
+
+
+                        // Validate Họ tên
+                        if (fullName.trim().isBlank()) {
+                            fullNameError = "Vui lòng nhập họ và tên"
                             isValid = false
                         }
+
+
+                        // Validate Mật khẩu
                         if (!isPasswordValid(password)) {
-                            passwordError = "Mật khẩu không đủ mạnh."
+                            passwordError = "Mật khẩu phải ≥ 8 ký tự, có chữ số và ký tự đặc biệt"
                             isValid = false
                         }
 
 
-
-
+                        // Nếu dữ liệu hợp lệ → tiến hành đăng ký
                         if (isValid) {
                             isLoading = true
-                            auth.createUserWithEmailAndPassword(email, password)
-                                .addOnCompleteListener { task: Task<AuthResult> ->
-                                    isLoading = false
-                                    if (task.isSuccessful) {
-                                        // TODO: Lưu 'tenKhachHang' vào Firestore
-                                        Toast.makeText(context, "Đăng ký thành công! Vui lòng đăng nhập.", Toast.LENGTH_LONG).show()
+                            coroutineScope.launch {
+                                try {
+                                    // BƯỚC 1: Tạo tài khoản trong Firebase Authentication
+                                    val authResult = auth.createUserWithEmailAndPassword(email.trim(), password).await()
+                                    val firebaseUser = authResult.user ?: throw Exception("Không thể lấy thông tin người dùng")
 
 
+                                    // BƯỚC 2: Lưu thông tin khách hàng vào Firestore
+                                    val userData = hashMapOf(
+                                        "fullName" to fullName.trim(),
+                                        "email" to email.trim().lowercase(),
+                                        "phone" to "",
+                                        "createdAt" to FieldValue.serverTimestamp(),
+                                        "uid" to firebaseUser.uid
+                                    )
 
 
-                                        // --- SỬA LẠI: Chuyển về trang Login ---
-                                        navController.navigate(AppRoutes.LOGIN) {
-                                            popUpTo(AppRoutes.REGISTER) { inclusive = true }
-                                            launchSingleTop = true
+                                    firestore.collection("users")
+                                        .document(firebaseUser.uid)  // Document ID = UID → chuẩn, dễ truy vấn sau này
+                                        .set(userData, SetOptions.merge())
+                                        .await()
+
+
+                                    // BƯỚC 3: Thành công → Thông báo + vào thẳng Home
+                                    Toast.makeText(context, "Đăng ký thành công! Chào mừng $fullName", Toast.LENGTH_LONG).show()
+                                    navigateToHome()  // ĐÃ ĐĂNG NHẬP LUÔN → KHÔNG CẦN QUA MÀN LOGIN
+
+
+                                } catch (e: Exception) {
+                                    // XỬ LÝ LỖI CHI TIẾT – TIẾNG VIỆT – RẤT CHUYÊN NGHIỆP
+                                    when (e) {
+                                        is com.google.firebase.auth.FirebaseAuthUserCollisionException -> {
+                                            emailError = "Email này đã được sử dụng. Vui lòng dùng email khác hoặc đăng nhập."
                                         }
-                                        // --- HẾT SỬA ---
-
-
-
-
-                                    } else {
-                                        Toast.makeText(context, "Lỗi: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                                        is com.google.firebase.auth.FirebaseAuthWeakPasswordException -> {
+                                            passwordError = "Mật khẩu quá yếu. Vui lòng thử lại."
+                                        }
+                                        is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException -> {
+                                            emailError = "Email không hợp lệ. Vui lòng kiểm tra lại."
+                                        }
+                                        else -> {
+                                            Toast.makeText(context, "Đăng ký thất bại: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                                        }
                                     }
+                                } finally {
+                                    isLoading = false
                                 }
+                            }
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LoginButtonColor),
-                    shape = RoundedCornerShape(16.dp)
+                    enabled = !isLoading
                 ) {
-                    Text(text = "Đăng ký", fontSize = 18.sp, color = Color.White)
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            strokeWidth = 3.dp,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text("Đang tạo tài khoản...", fontSize = 18.sp, color = Color.White)
+                    } else {
+                        Text("Đăng ký", fontSize = 18.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    }
                 }
-
-
 
 
                 Spacer(modifier = Modifier.height(32.dp))
 
 
-
-
-                // --- Đăng nhập Social ---
-                Text(text = "Or sign up with", color = Color.Gray)
+                // Chỉ còn lại đăng nhập ẩn danh (khách)
+                Text("Hoặc", color = Color.Gray, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(16.dp))
 
 
-
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Nút Google (Giữ nguyên logic vào Home)
-                    IconButton(
-                        onClick = {
-                            isLoading = true
-                            googleSignInLauncher.launch(googleSignInClient.signInIntent)
-                        },
-                        modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
-                            .background(Color.White)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_google_logo),
-                            contentDescription = "Google Login",
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-
-
-
-
-                    Spacer(modifier = Modifier.width(32.dp))
-
-
-
-
-                    // Nút Ẩn danh (Giữ nguyên logic vào Home)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                     IconButton(
                         onClick = {
                             isLoading = true
                             auth.signInAnonymously()
-                                .addOnCompleteListener { task: Task<AuthResult> ->
+                                .addOnCompleteListener { task ->
                                     isLoading = false
                                     if (task.isSuccessful) {
-                                        Toast.makeText(context, "Đăng nhập với tư cách Khách", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, "Đăng nhập với tư cách khách", Toast.LENGTH_SHORT).show()
                                         navigateToHome()
                                     } else {
                                         Toast.makeText(context, "Lỗi: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
@@ -479,31 +353,31 @@ fun RegisterScreen(navController: NavController) {
                                 }
                         },
                         modifier = Modifier
-                            .size(60.dp)
+                            .size(64.dp)
                             .clip(CircleShape)
                             .background(Color.White)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.HelpOutline,
-                            contentDescription = "Đăng nhập Ẩn danh",
-                            modifier = Modifier.size(32.dp),
-                            tint = Color.DarkGray
+                            Icons.Default.HelpOutline,
+                            contentDescription = "Đăng nhập khách",
+                            tint = Color.DarkGray,
+                            modifier = Modifier.size(36.dp)
                         )
                     }
                 }
+
+
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
 
 
-
-
-        // --- Hiển thị Loading ---
+        // Loading overlay
         if (isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f)),
+                    .background(Color.Black.copy(alpha = 0.4f)),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(color = Color.White)
@@ -511,11 +385,5 @@ fun RegisterScreen(navController: NavController) {
         }
     }
 }
-
-
-
-
-
-
 
 
