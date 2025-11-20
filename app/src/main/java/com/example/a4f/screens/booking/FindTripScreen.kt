@@ -79,7 +79,7 @@ fun FindTripScreen(
     // Lấy chuỗi ngày đầy đủ để hiển thị trên TopBar (Ví dụ: Thứ Hai, 21/11/2025)
     val currentTopBarDate = dateListObj.getOrNull(selectedDateIndex)?.fullDateString ?: "Đang tải..."
 
-    // --- 2. TẠO DỮ LIỆU GIẢ LẬP (6 CHUYẾN/NGÀY, KHÁC NHAU THEO NGÀY) ---
+    // --- 2. TẠO DỮ LIỆU (6 CHUYẾN/NGÀY, KHÁC NHAU THEO NGÀY) ---
     // Khi selectedDateIndex thay đổi, danh sách chuyến xe sẽ được tạo mới
     val allTrips = remember(selectedDateIndex) {
         generateMockTripsForDate(selectedDateIndex, source, destination)
@@ -198,25 +198,101 @@ fun FindTripScreen(
 
 // --- HÀM TẠO DỮ LIỆU GIẢ LẬP (6 Chuyến/Ngày) ---
 fun generateMockTripsForDate(index: Int, source: String?, dest: String?): List<Trip> {
-    // Logic: Dựa vào index (ngày thứ mấy) để thay đổi giờ chạy một chút cho khác nhau
-    // 3 trạm yêu cầu: Bến xe Miền Tây, Bến xe Hà Tiên, VP Long Xuyên
+    val startPoint = source ?: "Bến xe Miền Tây"
+    val endPoint = dest ?: "VP Long Xuyên"
+    val offset = index * 15
 
-    // Xác định trạm đi/đến dựa vào tham số hoặc mặc định
-    val start = source ?: "Bến xe Miền Tây"
-    val destination = null
-    val end = destination ?: "VP Long Xuyên"
-
-    // Tạo biến đổi giờ để mỗi ngày giờ chạy lệch nhau 1 chút (cho cảm giác dữ liệu thật)
-    val offset = index * 15 // Mỗi ngày lệch 15 phút
+    // TỔNG SỐ GHẾ CỦA XE
+    val totalSeats = 28
 
     return listOf(
-        Trip("1", "${6 + (index % 2)}:${15 + (index * 5) % 45}", start, "${10 + (index % 2)}:${15 + (index * 5) % 45}", end, "185km - 4h", "230.000đ", 20 - index, "Limousine"),
-        Trip("2", "${8 + (index % 2)}:00", start, "${12 + (index % 2)}:00", end, "185km - 4h", "230.000đ", 15 + index, "Limousine"),
-        Trip("3", "${10 + (index % 2)}:30", start, "${14 + (index % 2)}:30", end, "185km - 4h", "200.000đ", 5 + index, "Giường nằm"),
-        Trip("4", "13:${15 + offset % 45}", start, "17:${15 + offset % 45}", end, "185km - 4h", "200.000đ", 12, "Giường nằm"),
-        Trip("5", "15:00", start, "19:00", end, "185km - 4h", "230.000đ", 8, "Limousine"),
-        Trip("6", "22:00", start, "02:00", end, "185km - 4h", "200.000đ", 30, "Giường nằm")
+        Trip(
+            id = "1",
+            startTime = "${6 + (index % 2)}:${15 + (index * 5) % 45}",
+            startStation = startPoint,
+            endTime = "${10 + (index % 2)}:${15 + (index * 5) % 45}",
+            endStation = endPoint,
+            distanceTime = "185km - 4h",
+            price = "230.000đ",
+            // TÍNH TOÁN: 28 - Số ghế đã bán của chuyến 1 (4 ghế) = 24 chỗ
+            seatsAvailable = totalSeats - getSoldSeatsCount("1"),
+            seatType = "Limousine"
+        ),
+        Trip(
+            id = "2",
+            startTime = "${8 + (index % 2)}:00",
+            startStation = startPoint,
+            endTime = "${12 + (index % 2)}:00",
+            endStation = endPoint,
+            distanceTime = "185km - 4h",
+            price = "230.000đ",
+            // TÍNH TOÁN: 28 - Số ghế đã bán của chuyến 2 (6 ghế) = 22 chỗ
+            seatsAvailable = totalSeats - getSoldSeatsCount("2"),
+            seatType = "Limousine"
+        ),
+        Trip(
+            id = "3",
+            startTime = "${10 + (index % 2)}:30",
+            startStation = startPoint,
+            endTime = "${14 + (index % 2)}:30",
+            endStation = endPoint,
+            distanceTime = "185km - 4h",
+            price = "200.000đ",
+            // TÍNH TOÁN: 28 - 5 = 23 chỗ
+            seatsAvailable = totalSeats - getSoldSeatsCount("3"),
+            seatType = "Giường nằm"
+        ),
+        Trip(
+            id = "4",
+            startTime = "13:${15 + offset % 45}",
+            startStation = startPoint,
+            endTime = "17:${15 + offset % 45}",
+            endStation = endPoint,
+            distanceTime = "185km - 4h",
+            price = "2000.000đ",
+            // TÍNH TOÁN: 28 - 4 = 24 chỗ
+            seatsAvailable = totalSeats - getSoldSeatsCount("4"),
+            seatType = "Giường nằm"
+        ),
+        Trip(
+            id = "5",
+            startTime = "15:00",
+            startStation = startPoint,
+            endTime = "19:00",
+            endStation = endPoint,
+            distanceTime = "185km - 4h",
+            price = "230.000đ",
+            // TÍNH TOÁN: 28 - 0 = 28 chỗ (Trống hết)
+            seatsAvailable = totalSeats - getSoldSeatsCount("5"),
+            seatType = "Limousine"
+        ),
+        Trip(
+            id = "6",
+            startTime = "22:00",
+            startStation = startPoint,
+            endTime = "02:00",
+            endStation = endPoint,
+            distanceTime = "185km - 4h",
+            price = "200.000đ",
+            // TÍNH TOÁN: 28 - 8 = 20 chỗ
+            seatsAvailable = totalSeats - getSoldSeatsCount("6"),
+            seatType = "Giường nằm"
+        )
     )
+}
+
+// --- HÀM PHỤ TRỢ: ĐẾM SỐ GHẾ ĐÃ BÁN (LOGIC GIỐNG BÊN SELECT SEAT) ---
+fun getSoldSeatsCount(tripId: String): Int {
+    // Copy logic danh sách ghế bán từ SelectSeatScreen sang đây để đếm
+    return when (tripId) {
+        "1" -> 4  // listOf("A01", "A02", "B05", "B06").size
+        "2" -> 6  // listOf("A03", "A04", "A05", "B01", "B02", "B10").size
+        "3" -> 5  // listOf("A01", "A10", "A11", "B13", "B14").size
+        "4" -> 4  // listOf("A05", "A06", "B05", "B06").size
+        "5" -> 0  // listOf().size
+        "6" -> 8  // listOf("A01"..."A08").size
+        else -> 2 // Mặc định
+    }
 }
 
 // --- HÀM XỬ LÝ NGÀY THÁNG ---
