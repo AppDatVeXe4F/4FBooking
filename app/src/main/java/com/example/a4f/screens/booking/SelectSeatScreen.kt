@@ -41,7 +41,8 @@ fun SelectSeatScreen(
     pricePerTicket: Int = 200000,
     source: String? = "TP. HỒ CHÍ MINH",
     destination: String? = "AN GIANG",
-    date: String? = "Chủ nhật, 28-09-2025"
+    date: String? = "Chủ nhật, 28-09-2025",
+    startTime: String = "06:15"
 ) {
     val selectedSeats = remember { mutableStateListOf<String>() }
 
@@ -90,7 +91,19 @@ fun SelectSeatScreen(
 
     // FOOTER
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-        SeatSummaryFooter(selectedSeats, totalPrice, onContinue = { })
+        SeatSummaryFooter(
+            selectedSeats = selectedSeats,
+            totalPrice = totalPrice,
+            onContinue = {
+                val seatsString = selectedSeats.joinToString(", ")
+                val src = source ?: "TP. HCM"
+                val dest = destination ?: "AN GIANG"
+                val dateStr = date?.replace("/", "-") ?: "28-09-2025"
+
+                // 2. GỬI startTime SANG MÀN HÌNH THÔNG TIN
+                navController.navigate("fill_info_screen/$seatsString/$totalPrice/$src/$dest/$dateStr/$startTime")
+            }
+        )
     }
 }
 

@@ -19,6 +19,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.a4f.navigation.BottomNavItem
+import com.example.a4f.screens.booking.FillInfoScreen
 import com.example.a4f.screens.booking.FindTripScreen
 import com.example.a4f.screens.booking.SelectSeatScreen
 
@@ -100,31 +101,63 @@ fun MainScreen(navController: NavHostController) {
                 }
             }
 
-            // 6. THÊM MÀN HÌNH CHỌN GHẾ VÀO ĐÂY (Nằm chung NavHost để giữ Menu)
+            // 5. MÀN HÌNH CHỌN GHẾ (SỬA LẠI: Thêm startTime)
             composable(
-                // SỬA DÒNG NÀY: Thêm {tripId} vào đường dẫn
-                route = "select_seat_screen/{tripId}/{price}/{source}/{destination}/{date}",
+                route = "select_seat_screen/{tripId}/{price}/{source}/{destination}/{date}/{startTime}", // <--- THÊM startTime
                 arguments = listOf(
-                    navArgument("tripId") { type = NavType.StringType }, // Nhận ID chuyến xe
+                    navArgument("tripId") { type = NavType.StringType },
                     navArgument("price") { type = NavType.IntType },
                     navArgument("source") { type = NavType.StringType },
                     navArgument("destination") { type = NavType.StringType },
-                    navArgument("date") { type = NavType.StringType }
+                    navArgument("date") { type = NavType.StringType },
+                    navArgument("startTime") { type = NavType.StringType } // <--- THÊM DÒNG NÀY
                 )
             ) { backStackEntry ->
                 val tripId = backStackEntry.arguments?.getString("tripId") ?: "1"
-                val price = backStackEntry.arguments?.getInt("price") ?: 200000
+                val price = backStackEntry.arguments?.getInt("price") ?: 0
                 val source = backStackEntry.arguments?.getString("source")
                 val destination = backStackEntry.arguments?.getString("destination")
                 val date = backStackEntry.arguments?.getString("date")
+                val startTime = backStackEntry.arguments?.getString("startTime") ?: "00:00" // <--- LẤY GIỜ
 
                 SelectSeatScreen(
                     navController = bottomNavController,
-                    tripId = tripId, // Truyền ID vào màn hình ghế
+                    tripId = tripId,
                     pricePerTicket = price,
                     source = source,
                     destination = destination,
-                    date = date
+                    date = date,
+                    startTime = startTime // <--- TRUYỀN VÀO
+                )
+            }
+
+            // 6. MÀN HÌNH ĐIỀN THÔNG TIN (SỬA LẠI: Thêm startTime)
+            composable(
+                route = "fill_info_screen/{selectedSeats}/{totalPrice}/{source}/{destination}/{date}/{startTime}", // <--- THÊM startTime
+                arguments = listOf(
+                    navArgument("selectedSeats") { type = NavType.StringType },
+                    navArgument("totalPrice") { type = NavType.IntType },
+                    navArgument("source") { type = NavType.StringType },
+                    navArgument("destination") { type = NavType.StringType },
+                    navArgument("date") { type = NavType.StringType },
+                    navArgument("startTime") { type = NavType.StringType } // <--- THÊM DÒNG NÀY
+                )
+            ) { backStackEntry ->
+                val selectedSeats = backStackEntry.arguments?.getString("selectedSeats") ?: ""
+                val totalPrice = backStackEntry.arguments?.getInt("totalPrice") ?: 0
+                val source = backStackEntry.arguments?.getString("source")
+                val destination = backStackEntry.arguments?.getString("destination")
+                val date = backStackEntry.arguments?.getString("date")
+                val startTime = backStackEntry.arguments?.getString("startTime") ?: "00:00" // <--- LẤY GIỜ
+
+                FillInfoScreen(
+                    navController = bottomNavController,
+                    source = source,
+                    destination = destination,
+                    date = date,
+                    selectedSeats = selectedSeats,
+                    totalPrice = totalPrice,
+                    startTime = startTime // <--- TRUYỀN VÀO
                 )
             }
         }
