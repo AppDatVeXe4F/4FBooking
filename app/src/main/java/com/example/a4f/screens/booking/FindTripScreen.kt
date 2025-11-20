@@ -176,7 +176,20 @@ fun FindTripScreen(
                     }
                 } else {
                     items(filteredTrips) { trip ->
-                        TripCardItem(trip = trip, onClick = { })
+                        TripCardItem(trip = trip, onClick = {
+                            val priceInt = trip.realPrice
+                            val src = source ?: "TP. HCM"
+                            val dest = destination ?: "AN GIANG"
+
+                            // Thay dấu / thành - để tránh lỗi
+                            val dateStr = currentTopBarDate.replace("/", "-")
+
+                            // LẤY ID CHUYẾN XE
+                            val tripId = trip.id
+
+                            // GỬI tripId ĐI (Thêm vào đầu đường dẫn)
+                            navController.navigate("select_seat_screen/$tripId/$priceInt/$src/$dest/$dateStr")
+                        })
                     }
                 }
             }

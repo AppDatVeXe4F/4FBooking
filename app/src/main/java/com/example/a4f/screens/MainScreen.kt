@@ -8,17 +8,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.a4f.navigation.BottomNavItem
 import com.example.a4f.screens.booking.FindTripScreen
+import com.example.a4f.screens.booking.SelectSeatScreen
 
 @Composable
 fun MainScreen(navController: NavHostController) {
@@ -98,7 +100,33 @@ fun MainScreen(navController: NavHostController) {
                 }
             }
 
-            // ĐÃ XÓA: Đoạn composable(route = "find_trip_screen/...") vì không cần thiết nữa
+            // 6. THÊM MÀN HÌNH CHỌN GHẾ VÀO ĐÂY (Nằm chung NavHost để giữ Menu)
+            composable(
+                // SỬA DÒNG NÀY: Thêm {tripId} vào đường dẫn
+                route = "select_seat_screen/{tripId}/{price}/{source}/{destination}/{date}",
+                arguments = listOf(
+                    navArgument("tripId") { type = NavType.StringType }, // Nhận ID chuyến xe
+                    navArgument("price") { type = NavType.IntType },
+                    navArgument("source") { type = NavType.StringType },
+                    navArgument("destination") { type = NavType.StringType },
+                    navArgument("date") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val tripId = backStackEntry.arguments?.getString("tripId") ?: "1"
+                val price = backStackEntry.arguments?.getInt("price") ?: 200000
+                val source = backStackEntry.arguments?.getString("source")
+                val destination = backStackEntry.arguments?.getString("destination")
+                val date = backStackEntry.arguments?.getString("date")
+
+                SelectSeatScreen(
+                    navController = bottomNavController,
+                    tripId = tripId, // Truyền ID vào màn hình ghế
+                    pricePerTicket = price,
+                    source = source,
+                    destination = destination,
+                    date = date
+                )
+            }
         }
     }
 }
