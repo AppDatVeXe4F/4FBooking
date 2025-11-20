@@ -33,7 +33,8 @@ import com.example.a4f.R
 import com.example.a4f.data.DealItem
 import com.example.a4f.data.FirestoreService
 import com.example.a4f.data.NewsItem
-import com.example.a4f.navigation.AppRoutes
+import com.example.a4f.navigation.BottomNavItem
+// import com.example.a4f.navigation.BottomNavItem // <-- Không cần dùng cái này nữa vì ta không switch tab
 import com.example.a4f.ui.theme.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -41,8 +42,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.absoluteValue
 
-
-// ================== DỮ LIỆU DUMMY ==================
+// ... (Giữ nguyên phần Dữ liệu Dummy) ...
 val imageList = listOf(R.drawable.image1, R.drawable.img_honphutu, R.drawable.image2)
 val dummyDeals = listOf(
     DealItem(1, R.drawable.deal_vertical_dalat, "ĐÀ LẠT GỌI, BẠN TRẢ LỜI CHƯA?", "Tận hưởng không khí se lạnh..."),
@@ -53,13 +53,14 @@ val dummyNews = listOf(
     NewsItem(2, R.drawable.news_bus, "Trải nghiệm dòng xe bus cao cấp mới nhất")
 )
 
-// ================== HOME SCREEN CHÍNH ==================
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(navController: NavController) {
+    // Các biến State lưu dữ liệu người dùng chọn
     var diemDi by rememberSaveable { mutableStateOf("") }
     var diemDen by rememberSaveable { mutableStateOf("") }
-    var ngayDi by rememberSaveable { mutableStateOf("28,Th9 2025") }
+    var ngayDi by rememberSaveable { mutableStateOf("28,Th9 2025") } // Giá trị mặc định
+
     var locations by remember { mutableStateOf<List<String>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     val datePickerState = rememberDatePickerState()
@@ -69,9 +70,9 @@ fun HomeScreen(navController: NavController) {
         isLoading = true
         try {
             val result = withContext(Dispatchers.IO) { FirestoreService.getLocationNames() }
-            locations = if (result.isEmpty()) listOf("Không có dữ liệu") else result
+            locations = if (result.isEmpty()) listOf("TP. Hồ Chí Minh", "An Giang", "Cần Thơ") else result
         } catch (e: Exception) {
-            locations = listOf("Lỗi kết nối")
+            locations = listOf("Lỗi kết nối", "TP. Hồ Chí Minh", "An Giang")
         } finally {
             isLoading = false
         }
@@ -127,8 +128,7 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
-// ================== CÁC HÀM HỖ TRỢ (ĐÃ SỬA HOÀN HẢO) ==================
-
+// ... (Giữ nguyên HomeTopAppBar, ImagePagerSection) ...
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopAppBar() {
@@ -188,6 +188,7 @@ fun SearchSection(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Dropdown Điểm đi
             ExposedDropdownMenuBox(expanded = expandedDi, onExpandedChange = { expandedDi = it }) {
                 OutlinedTextField(
                     value = diemDi, onValueChange = {}, readOnly = true, modifier = Modifier.fillMaxWidth().menuAnchor(),
@@ -203,16 +204,13 @@ fun SearchSection(
                     shape = RoundedCornerShape(12.dp)
                 )
                 ExposedDropdownMenu(expanded = expandedDi, onDismissRequest = { expandedDi = false }) {
-                    if (isLoading) {
-                        DropdownMenuItem(text = { Text("Đang tải...") }, onClick = {})
-                    } else {
-                        locations.forEach { location ->
-                            DropdownMenuItem(text = { Text(location) }, onClick = { onDiemDiChange(location); expandedDi = false })
-                        }
+                    locations.forEach { location ->
+                        DropdownMenuItem(text = { Text(location) }, onClick = { onDiemDiChange(location); expandedDi = false })
                     }
                 }
             }
 
+            // Dropdown Điểm đến
             ExposedDropdownMenuBox(expanded = expandedDen, onExpandedChange = { expandedDen = it }) {
                 OutlinedTextField(
                     value = diemDen, onValueChange = {}, readOnly = true, modifier = Modifier.fillMaxWidth().menuAnchor(),
@@ -228,8 +226,7 @@ fun SearchSection(
                     shape = RoundedCornerShape(12.dp)
                 )
                 ExposedDropdownMenu(expanded = expandedDen, onDismissRequest = { expandedDen = false }) {
-                    if (isLoading) DropdownMenuItem(text = { Text("Đang tải...") }, onClick = {})
-                    else locations.forEach { location ->
+                    locations.forEach { location ->
                         DropdownMenuItem(text = { Text(location) }, onClick = { onDiemDenChange(location); expandedDen = false })
                     }
                 }
@@ -245,10 +242,19 @@ fun SearchSection(
         Button(
             onClick = {
                 if (isFormValid) {
-                    // Chuyển thẳng sang tab "Đặt vé" trong Bottom Navigation
-                    navController.navigate("booking_screen") {
-                        popUpTo(navController.graph.startDestinationId)
+                    // 1. LƯU DỮ LIỆU VÀO BỘ NHỚ CỦA NAVIGATION
+                    navController.currentBackStackEntry?.savedStateHandle?.set("source", diemDi)
+                    navController.currentBackStackEntry?.savedStateHandle?.set("destination", diemDen)
+                    navController.currentBackStackEntry?.savedStateHandle?.set("date", ngayDi)
+
+                    // 2. CHUYỂN SANG TAB ĐẶT VÉ
+                    navController.navigate(BottomNavItem.Booking.route) {
+                        // Xóa stack để tránh bị back vòng vo
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
                         launchSingleTop = true
+                        restoreState = true
                     }
                 }
             },
@@ -264,6 +270,7 @@ fun SearchSection(
     }
 }
 
+// ... (Giữ nguyên phần còn lại của file) ...
 @Composable
 fun SmallSearchInput(modifier: Modifier = Modifier, icon: ImageVector?, text: String, onClick: () -> Unit) {
     Row(

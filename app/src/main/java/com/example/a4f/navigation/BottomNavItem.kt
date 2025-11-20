@@ -1,8 +1,5 @@
 package com.example.a4f.navigation
 
-
-
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -10,42 +7,14 @@ import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
 
-
-
-
-// Định nghĩa các đối tượng cho Bottom Navigation
 sealed class BottomNavItem(
     val route: String,
     val title: String,
     val icon: ImageVector
 ) {
-    object Home : BottomNavItem(
-        route = AppRoutes.HOME,
-        title = "Trang chủ",        // ← Chỉ để 1 lần ở đây
-        icon = Icons.Default.Home,
-
-
-        )
-    object Booking : BottomNavItem(
-        route = "booking_tab",
-        title = "Đặt vé",
-        icon = Icons.Default.CalendarMonth
-    )
-    object MyTickets : BottomNavItem(
-        route = "tickets_tab",
-        title = "Vé của tôi",
-        icon = Icons.Default.ConfirmationNumber
-    )
-    object Profile : BottomNavItem(
-        route = "profile_tab",
-        title = "Cá nhân",
-        icon = Icons.Default.AccountCircle
-    )
+    // Đặt tên route là "_tab" để tránh trùng lặp
+    object Home : BottomNavItem("home_tab", "Trang chủ", Icons.Default.Home)
+    object Booking : BottomNavItem("booking_tab", "Đặt vé", Icons.Default.CalendarMonth)
+    object MyTickets : BottomNavItem("tickets_tab", "Vé của tôi", Icons.Default.ConfirmationNumber)
+    object Profile : BottomNavItem("profile_tab", "Cá nhân", Icons.Default.AccountCircle)
 }
-
-
-
-
-
-
-
