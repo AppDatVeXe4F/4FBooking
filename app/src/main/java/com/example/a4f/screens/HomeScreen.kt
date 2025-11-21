@@ -34,7 +34,6 @@ import com.example.a4f.data.DealItem
 import com.example.a4f.data.FirestoreService
 import com.example.a4f.data.NewsItem
 import com.example.a4f.navigation.BottomNavItem
-// import com.example.a4f.navigation.BottomNavItem // <-- Không cần dùng cái này nữa vì ta không switch tab
 import com.example.a4f.ui.theme.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -42,7 +41,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.absoluteValue
 
-// ... (Giữ nguyên phần Dữ liệu Dummy) ...
+
 val imageList = listOf(R.drawable.image1, R.drawable.img_honphutu, R.drawable.image2)
 val dummyDeals = listOf(
     DealItem(1, R.drawable.deal_vertical_dalat, "ĐÀ LẠT GỌI, BẠN TRẢ LỜI CHƯA?", "Tận hưởng không khí se lạnh..."),
@@ -128,7 +127,7 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
-// ... (Giữ nguyên HomeTopAppBar, ImagePagerSection) ...
+// ...  HomeTopAppBar, ImagePagerSection ...
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopAppBar() {

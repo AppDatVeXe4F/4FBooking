@@ -12,23 +12,25 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Chair
 import androidx.compose.material.icons.filled.Circle
-import androidx.compose.material.icons.filled.Edit // Icon cây viết
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-// Màu sắc
 val SectionHeaderBg = Color(0xFFCFE0DE)
 val InfoBoxBg = Color(0xFFE0E0E0)
 val TicketInfoBg = Color(0xFF9EB8B6)
@@ -43,17 +45,46 @@ fun FillInfoScreen(
     totalPrice: Int,
     startTime: String
 ) {
-    // Xử lý dữ liệu hiển thị
-    val arrivalTime = calculateArrivalTime(startTime, -30)
+    // 1. Tính toán giờ:
+    // Giờ có mặt (trước 30 phút)
+    val arrivalTimeForCheckIn = calculateArrivalTime(startTime, -30)
+    // Giờ đến nơi (Giả sử hành trình 4 tiếng = 240 phút) để hiển thị vào thẻ vé
+    val endTime = calculateArrivalTime(startTime, 240)
+
     val displayDate = date?.replace("-", "/") ?: ""
     val displayPrice = if (totalPrice > 0) "${totalPrice/1000}.000đ" else "0đ"
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        // 1. HEADER XANH
+    // Firebase logic
+    var userName by remember { mutableStateOf("Đang tải...") }
+    var userPhone by remember { mutableStateOf("Đang tải...") }
+    var userEmail by remember { mutableStateOf("Đang tải...") }
+
+    LaunchedEffect(Unit) {
+        val auth = FirebaseAuth.getInstance()
+        val currentUser = auth.currentUser
+        val db = FirebaseFirestore.getInstance()
+
+        if (currentUser != null) {
+            userEmail = currentUser.email ?: "Chưa có email"
+            db.collection("users").document(currentUser.uid).get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.exists()) {
+                        userName = document.getString("fullName") ?: document.getString("name") ?: "Chưa cập nhật tên"
+                        userPhone = document.getString("phoneNumber") ?: document.getString("phone") ?: "Chưa cập nhật SĐT"
+                    } else {
+                        userName = currentUser.displayName ?: "Khách hàng"
+                        userPhone = "Chưa cập nhật"
+                    }
+                }
+                .addOnFailureListener { userName = "Lỗi kết nối" }
+        } else {
+            userEmail = "Chưa đăng nhập"
+            userName = "Khách vãng lai"
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        // HEADER
         Column(modifier = Modifier.fillMaxWidth().background(AppGreen)) {
             Spacer(modifier = Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
             Box(modifier = Modifier.fillMaxWidth().height(56.dp)) {
@@ -67,47 +98,46 @@ fun FillInfoScreen(
             }
         }
 
-        // 2. NỘI DUNG CHÍNH (Phần này bị mất ở video của bạn)
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()) // Cho phép cuộn
-        ) {
-            // Stepper
+        // BODY
+        Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             BookingStepperInfo()
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- SECTION 1: THÔNG TIN KHÁCH HÀNG ---
-            SectionTitle(
-                title = "Thông tin khách hàng",
-                onEdit = {
-                    // TODO: Xử lý khi bấm nút sửa
-                }
-            )
+            // SECTION 1: THÔNG TIN KHÁCH HÀNG
+            SectionTitle(title = "Thông tin khách hàng", onEdit = { /* TODO */ })
             Column(modifier = Modifier.padding(16.dp)) {
-                InfoRow(label = "Họ và tên :", value = "Nhật Thúy")
-                InfoRow(label = "Số điện thoại :", value = "0369449278")
-                InfoRow(label = "Email :", value = "Jjung@gmail.com")
+                InfoRow(label = "Họ và tên :", value = userName)
+                InfoRow(label = "Số điện thoại :", value = userPhone)
+                InfoRow(label = "Email :", value = userEmail)
             }
 
-            // --- SECTION 2: TÓM TẮT VÉ ---
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Cục Giờ & Tuyến
-                Card(colors = CardDefaults.cardColors(containerColor = TicketInfoBg), shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1.2f).height(70.dp)) {
+            // SECTION 2: TÓM TẮT VÉ (ĐÃ CHỈNH SỬA THEO YÊU CẦU)
+            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Cục Giờ & Tuyến (Lớn nhất) - ĐÃ SỬA NỘI DUNG
+                Card(colors = CardDefaults.cardColors(containerColor = TicketInfoBg), shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1.3f).height(70.dp)) {
                     Column(modifier = Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.Center) {
-                        Text("$startTime - ...", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                        Text("$source", color = Color.White, fontSize = 10.sp, maxLines = 1)
+                        // Dòng 1: Giờ đi - Giờ đến
+                        Text(
+                            text = "$startTime - $endTime",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        // Dòng 2: Bến đi - Bến đến
+                        Text(
+                            text = "$source - $destination",
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            lineHeight = 14.sp
+                        )
                     }
                 }
-                // Cục Giá & Ghế
+
+                // Cục bên phải (Giá & Ghế)
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // Giá & Loại xe
                     Card(colors = CardDefaults.cardColors(containerColor = TicketInfoBg), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth().height(31.dp)) {
                         Row(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(displayPrice, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
@@ -115,7 +145,6 @@ fun FillInfoScreen(
                             Text("Limousine", color = Color.White, fontSize = 10.sp)
                         }
                     }
-                    // Số ghế
                     Card(colors = CardDefaults.cardColors(containerColor = TicketInfoBg), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth().height(31.dp)) {
                         Row(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Chair, contentDescription = null, tint = AppGreen, modifier = Modifier.size(14.dp))
@@ -128,8 +157,8 @@ fun FillInfoScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- SECTION 3: THÔNG TIN ĐÓN TRẢ ---
-            SectionTitle(title = "Thông tin đón trả", onEdit = null) // Không có nút sửa
+            // SECTION 3: THÔNG TIN ĐÓN TRẢ
+            SectionTitle(title = "Thông tin đón trả", onEdit = null)
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Điểm đón", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -138,7 +167,7 @@ fun FillInfoScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("Lưu ý:", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 Text(
-                    text = "Quý khách vui lòng có mặt tại $source trước $arrivalTime $displayDate để được kiểm tra thông tin trước khi lên xe.",
+                    text = "Quý khách vui lòng có mặt tại $source trước $arrivalTimeForCheckIn $displayDate để được kiểm tra thông tin trước khi lên xe.",
                     color = AppGreen,
                     fontSize = 13.sp,
                     lineHeight = 18.sp
@@ -149,23 +178,14 @@ fun FillInfoScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 AddressBox(text = "$destination")
             }
-
-            // Spacer cuối cùng để nội dung không bị nút che mất
             Spacer(modifier = Modifier.height(80.dp))
         }
     }
 
-    // 3. FOOTER BUTTON (Nổi lên trên cùng)
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.BottomCenter
-    ) {
+    // FOOTER
+    Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.BottomCenter) {
         Button(
-            onClick = {
-                // TODO: Chuyển sang màn Thanh Toán
-            },
+            onClick = { /* TODO: Thanh toán */ },
             colors = ButtonDefaults.buttonColors(containerColor = AppGreen),
             modifier = Modifier.fillMaxWidth().height(50.dp),
             shape = RoundedCornerShape(12.dp)
@@ -177,8 +197,7 @@ fun FillInfoScreen(
     }
 }
 
-// --- CÁC HÀM HỖ TRỢ UI ---
-
+// HÀM HỖ TRỢ TÍNH GIỜ
 fun calculateArrivalTime(time: String, minuteOffset: Int): String {
     return try {
         val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -192,24 +211,13 @@ fun calculateArrivalTime(time: String, minuteOffset: Int): String {
     }
 }
 
+// ... (Giữ nguyên các hàm SectionTitle, InfoRow, AddressBox, BookingStepperInfo như cũ) ...
 @Composable
 fun SectionTitle(title: String, onEdit: (() -> Unit)? = null) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(SectionHeaderBg)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(modifier = Modifier.fillMaxWidth().background(SectionHeaderBg).padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
         Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
         if (onEdit != null) {
-            Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit",
-                tint = Color.Black,
-                modifier = Modifier.size(20.dp).clickable { onEdit() }
-            )
+            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = Color.Black, modifier = Modifier.size(20.dp).clickable { onEdit() })
         }
     }
 }

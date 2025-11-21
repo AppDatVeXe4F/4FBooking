@@ -1,5 +1,6 @@
 package com.example.a4f.screens.booking
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -95,12 +96,18 @@ fun SelectSeatScreen(
             selectedSeats = selectedSeats,
             totalPrice = totalPrice,
             onContinue = {
-                val seatsString = selectedSeats.joinToString(", ")
+                // --- LOGIC CHUYỂN SANG MÀN 3 (ĐIỀN THÔNG TIN) ---
+
+                // 1. Tạo chuỗi danh sách ghế (VD: "A01, A02")
+                val seatsString = if (selectedSeats.isEmpty()) "Chưa chọn" else selectedSeats.joinToString(", ")
+
+                // 2. Chuẩn bị dữ liệu (Xử lý null và format ngày)
                 val src = source ?: "TP. HCM"
                 val dest = destination ?: "AN GIANG"
+                // Quan trọng: Thay thế dấu "/" bằng "-" để không bị lỗi đường dẫn
                 val dateStr = date?.replace("/", "-") ?: "28-09-2025"
 
-                // 2. GỬI startTime SANG MÀN HÌNH THÔNG TIN
+                // 3. Chuyển màn hình kèm theo dữ liệu
                 navController.navigate("fill_info_screen/$seatsString/$totalPrice/$src/$dest/$dateStr/$startTime")
             }
         )
