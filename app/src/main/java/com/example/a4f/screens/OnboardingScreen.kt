@@ -48,13 +48,11 @@ fun OnboardingScreen(navController: NavController) {
 
     // Hàm xử lý khi nhấn nút "Next"
     val onNextClick = {
-        if (pagerState.currentPage < 1) { // 1 là trang cuối (vì có 2 trang 0, 1)
-            // Nếu chưa phải trang cuối, vuốt sang trang kế
+        if (pagerState.currentPage < 1) {
             scope.launch {
                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
             }
         } else {
-            // Nếu đang ở trang cuối, chuyển đến màn hình Login
             navController.navigate(AppRoutes.LOGIN) {
                 popUpTo(AppRoutes.ONBOARDING) { inclusive = true }
             }
@@ -64,7 +62,6 @@ fun OnboardingScreen(navController: NavController) {
 
 
 
-    // Hàm xử lý khi nhấn "Skip"
     val onSkipClick = {
         navController.navigate(AppRoutes.LOGIN) {
             popUpTo(AppRoutes.ONBOARDING) { inclusive = true }
@@ -77,24 +74,23 @@ fun OnboardingScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppBackgroundColor) // 1. Nền xanh cho toàn màn hình
+            .background(AppBackgroundColor)
     ) {
         // 2. Pager
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize()
         ) { page ->
-            // Gọi Composable OnboardingPage
             when (page) {
                 0 -> OnboardingPage(
-                    imageRes = R.drawable.onboarding_1, // Tên ảnh 1
+                    imageRes = R.drawable.onboarding_1,
                     title = "DÙ ĐI MUÔN NƠI",
                     description = "Đặt vé thảnh thơi, không lo về giá!!!\nMời bạn ghé nhaaaaa"
                 )
                 1 -> OnboardingPage(
-                    imageRes = R.drawable.onboarding_2, // Tên ảnh 2
+                    imageRes = R.drawable.onboarding_2,
                     title = "CHỌN GHẾ ĐÚNG GU",
-                    description = "Ví vu mọi lúc" // Sửa lại mô tả cho giống design
+                    description = "Ví vu mọi lúc"
                 )
             }
         }
@@ -102,10 +98,10 @@ fun OnboardingScreen(navController: NavController) {
 
 
 
-        // 3. Thanh điều khiển ở dưới (Skip, Dots, Next)
+        // 3. Thanh điều khiển ở dưới
         BottomControls(
             modifier = Modifier
-                .align(Alignment.BottomCenter) // Nằm ở dưới cùng
+                .align(Alignment.BottomCenter)
                 .padding(bottom = 64.dp, start = 24.dp, end = 24.dp),
             pagerState = pagerState,
             pageCount = 2,
@@ -131,9 +127,9 @@ private fun BottomControls(
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween // Căn 3 cụm ra 3 góc
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // 1. Nút "Skip"
+        // 1. Skip
         TextButton(onClick = onSkipClick) {
             Text(text = "Skip", color = Color.White.copy(alpha = 0.7f))
         }
@@ -141,23 +137,23 @@ private fun BottomControls(
 
 
 
-        // 2. Dấu chấm (Indicator)
+        // 2. Dấu chấm
         MyPagerIndicator(
             pagerState = pagerState,
             pageCount = pageCount,
-            activeColor = Color.White, // Màu chấm (trang hiện tại)
-            inactiveColor = Color.White.copy(alpha = 0.3f) // Màu chấm (trang khác)
+            activeColor = Color.White,
+            inactiveColor = Color.White.copy(alpha = 0.3f)
         )
 
 
 
 
-        // 3. Nút "Next" (hình tròn)
+        // 3. Next
         IconButton(
             onClick = onNextClick,
             colors = IconButtonDefaults.iconButtonColors(
-                containerColor = Color.White, // Nền nút màu trắng
-                contentColor = AppBackgroundColor // Màu mũi tên là màu nền xanh
+                containerColor = Color.White,
+                contentColor = AppBackgroundColor
             )
         ) {
             Icon(
@@ -171,7 +167,7 @@ private fun BottomControls(
 
 
 
-// Composable cho Dấu chấm (Indicator) - đã cập nhật
+// Composable cho Dấu chấm (Indicator)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MyPagerIndicator(
@@ -188,7 +184,7 @@ fun MyPagerIndicator(
     ) {
         repeat(pageCount) { iteration ->
             val color = if (pagerState.currentPage == iteration) activeColor else inactiveColor
-            val width = if (pagerState.currentPage == iteration) 24.dp else 8.dp // <-- Đây!
+            val width = if (pagerState.currentPage == iteration) 24.dp else 8.dp
 
 
 
@@ -196,9 +192,9 @@ fun MyPagerIndicator(
             Box(
                 modifier = Modifier
                     .padding(4.dp)
-                    .clip(CircleShape) // Bo tròn
+                    .clip(CircleShape)
                     .background(color)
-                    .size(width = width, height = 8.dp) // Kích thước động
+                    .size(width = width, height = 8.dp)
             )
         }
     }

@@ -220,12 +220,8 @@ fun RegisterScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-
-                // Nút Đăng ký (đã hoàn thiện: tạo Auth + lưu Firestore + tự động vào Home)
-                // Nút Đăng ký – PHIÊN BẢN HOÀN CHỈNH NHẤT 2025
                 Button(
                     onClick = {
-                        // Reset lỗi trước khi validate
                         emailError = null
                         fullNameError = null
                         passwordError = null
@@ -233,39 +229,27 @@ fun RegisterScreen(navController: NavController) {
 
                         var isValid = true
 
-
-                        // Validate Email
                         if (email.trim().isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
                             emailError = "Vui lòng nhập email hợp lệ"
                             isValid = false
                         }
 
-
-                        // Validate Họ tên
                         if (fullName.trim().isBlank()) {
                             fullNameError = "Vui lòng nhập họ và tên"
                             isValid = false
                         }
 
-
-                        // Validate Mật khẩu
                         if (!isPasswordValid(password)) {
                             passwordError = "Mật khẩu phải ≥ 8 ký tự, có chữ số và ký tự đặc biệt"
                             isValid = false
                         }
 
-
-                        // Nếu dữ liệu hợp lệ → tiến hành đăng ký
                         if (isValid) {
                             isLoading = true
                             coroutineScope.launch {
                                 try {
-                                    // BƯỚC 1: Tạo tài khoản trong Firebase Authentication
                                     val authResult = auth.createUserWithEmailAndPassword(email.trim(), password).await()
                                     val firebaseUser = authResult.user ?: throw Exception("Không thể lấy thông tin người dùng")
-
-
-                                    // BƯỚC 2: Lưu thông tin khách hàng vào Firestore
                                     val userData = hashMapOf(
                                         "fullName" to fullName.trim(),
                                         "email" to email.trim().lowercase(),
@@ -276,18 +260,15 @@ fun RegisterScreen(navController: NavController) {
 
 
                                     firestore.collection("users")
-                                        .document(firebaseUser.uid)  // Document ID = UID → chuẩn, dễ truy vấn sau này
+                                        .document(firebaseUser.uid)
                                         .set(userData, SetOptions.merge())
                                         .await()
 
-
-                                    // BƯỚC 3: Thành công → Thông báo + vào thẳng Home
                                     Toast.makeText(context, "Đăng ký thành công! Chào mừng $fullName", Toast.LENGTH_LONG).show()
-                                    navigateToHome()  // ĐÃ ĐĂNG NHẬP LUÔN → KHÔNG CẦN QUA MÀN LOGIN
+                                    navigateToHome()
 
 
                                 } catch (e: Exception) {
-                                    // XỬ LÝ LỖI CHI TIẾT – TIẾNG VIỆT – RẤT CHUYÊN NGHIỆP
                                     when (e) {
                                         is com.google.firebase.auth.FirebaseAuthUserCollisionException -> {
                                             emailError = "Email này đã được sử dụng. Vui lòng dùng email khác hoặc đăng nhập."
@@ -332,7 +313,6 @@ fun RegisterScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(32.dp))
 
 
-                // Chỉ còn lại đăng nhập ẩn danh (khách)
                 Text("Hoặc", color = Color.Gray, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(16.dp))
 

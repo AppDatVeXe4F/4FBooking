@@ -6,7 +6,7 @@ import androidx.annotation.DrawableRes
 
 data class DealItem(
     val id: Int,
-    @DrawableRes val imageRes: Int, // Ảnh
+    @DrawableRes val imageRes: Int,
     val title: String,
     val description: String
 )

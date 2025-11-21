@@ -6,6 +6,6 @@ import androidx.annotation.DrawableRes
 
 data class NewsItem(
     val id: Int,
-    @DrawableRes val imageRes: Int, // Ảnh tin tức
+    @DrawableRes val imageRes: Int,
     val title: String
 )

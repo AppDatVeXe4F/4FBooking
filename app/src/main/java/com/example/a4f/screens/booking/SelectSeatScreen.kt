@@ -47,10 +47,10 @@ fun SelectSeatScreen(
 ) {
     val selectedSeats = remember { mutableStateListOf<String>() }
 
-    // --- LOGIC QUAN TRỌNG: TẠO DANH SÁCH GHẾ ĐÃ BÁN KHÁC NHAU DỰA VÀO TRIP ID ---
+    // --- TẠO DANH SÁCH GHẾ ĐÃ BÁN KHÁC NHAU DỰA VÀO TRIP ID ---
     val soldSeatsList = remember(tripId) { getSoldSeatsByTripId(tripId) }
 
-    // Tạo ghế Tầng 1 và Tầng 2 dựa trên danh sách đã bán ở trên
+    // Tầng 1 và Tầng 2 dựa trên danh sách đã bán
     val seatsFloor1 = remember(tripId) { generateSeats(1, soldSeatsList) }
     val seatsFloor2 = remember(tripId) { generateSeats(2, soldSeatsList) }
 
@@ -78,7 +78,7 @@ fun SelectSeatScreen(
             SeatLegend()
         }
 
-        // DANH SÁCH GHẾ (Padding bottom 200dp như bạn yêu cầu lúc nãy)
+        // DANH SÁCH GHẾ
         LazyColumn(
             modifier = Modifier.weight(1f).background(Color.White),
             contentPadding = PaddingValues(bottom = 200.dp)
@@ -96,19 +96,18 @@ fun SelectSeatScreen(
             selectedSeats = selectedSeats,
             totalPrice = totalPrice,
             onContinue = {
-                // --- LOGIC CHUYỂN SANG MÀN 3 (ĐIỀN THÔNG TIN) ---
+                // --- CHUYỂN SANG MÀN 3  ---
 
-                // 1. Tạo chuỗi danh sách ghế (VD: "A01, A02")
+                // 1. Chuỗi danh sách ghế
                 val seatsString = if (selectedSeats.isEmpty()) "Chưa chọn" else selectedSeats.joinToString(", ")
 
-                // 2. Chuẩn bị dữ liệu (Xử lý null và format ngày)
+                // 2. Dữ liệu
                 val src = source ?: "TP. HCM"
                 val dest = destination ?: "AN GIANG"
-                // Quan trọng: Thay thế dấu "/" bằng "-" để không bị lỗi đường dẫn
                 val dateStr = date?.replace("/", "-") ?: "28-09-2025"
 
-                // 3. Chuyển màn hình kèm theo dữ liệu
-                navController.navigate("fill_info_screen/$seatsString/$totalPrice/$src/$dest/$dateStr/$startTime")
+                // 3. Chuyển màn hình kèm theo dữ liệu + THÊM TRIP ID VÀO CUỐI
+                navController.navigate("fill_info_screen/$seatsString/$totalPrice/$src/$dest/$dateStr/$startTime/$tripId")
             }
         )
     }
@@ -117,17 +116,17 @@ fun SelectSeatScreen(
 // --- HÀM QUAN TRỌNG: QUY ĐỊNH GHẾ ĐÃ BÁN CHO TỪNG CHUYẾN ---
 fun getSoldSeatsByTripId(tripId: String): List<String> {
     return when (tripId) {
-        "1" -> listOf("A01", "A02", "B05", "B06") // Chuyến 1: Bán 4 ghế này
-        "2" -> listOf("A03", "A04", "A05", "B01", "B02", "B10") // Chuyến 2: Bán 6 ghế khác
-        "3" -> listOf("A01", "A10", "A11", "B13", "B14") // Chuyến 3: Bán ghế cuối
-        "4" -> listOf("A05", "A06", "B05", "B06") // Chuyến 4: Bán ghế giữa
-        "5" -> listOf() // Chuyến 5: Còn trống hết
-        "6" -> listOf("A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08") // Chuyến 6: Tầng 1 gần hết
-        else -> listOf("A01", "B01") // Mặc định
+        "1" -> listOf("A01", "A02", "B05", "B06")
+        "2" -> listOf("A03", "A04", "A05", "B01", "B02", "B10")
+        "3" -> listOf("A01", "A10", "A11", "B13", "B14")
+        "4" -> listOf("A05", "A06", "B05", "B06")
+        "5" -> listOf()
+        "6" -> listOf("A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08")
+        else -> listOf("A01", "B01")
     }
 }
 
-// --- CÁC COMPONENT CON (GIỮ NGUYÊN GIAO DIỆN ĐẸP CỦA BẠN) ---
+// --- CÁC COMPONENT CON  ---
 
 @Composable
 fun SeatGridSection(seats: List<Seat>, selectedSeats: MutableList<String>) {

@@ -54,7 +54,7 @@ data class Trip(
     val distanceTime: String,
     val price: String,
     val seatsAvailable: Int,
-    val seatType: String // Limousine, Giường nằm, Ghế ngồi
+    val seatType: String
 ) {
     val realPrice: Int
         get() = price.replace("[^0-9]".toRegex(), "").toIntOrNull() ?: 0
@@ -67,25 +67,19 @@ fun FindTripScreen(
     navController: NavController,
     source: String?,
     destination: String?,
-    date: String? // Định dạng nhận vào: "28,Th9 2025"
+    date: String?
 ) {
-    // --- 1. XỬ LÝ LOGIC NGÀY THÁNG ---
-    // Tạo danh sách 7 ngày bắt đầu từ ngày được truyền vào
+    // --- 1.  NGÀY THÁNG ---
     val dateListObj = remember(date) { generateNext7Days(date) }
-
-    // State lưu chỉ số ngày đang chọn (Mặc định là 0 - ngày đầu tiên)
     var selectedDateIndex by remember { mutableIntStateOf(0) }
-
-    // Lấy chuỗi ngày đầy đủ để hiển thị trên TopBar (Ví dụ: Thứ Hai, 21/11/2025)
     val currentTopBarDate = dateListObj.getOrNull(selectedDateIndex)?.fullDateString ?: "Đang tải..."
 
-    // --- 2. TẠO DỮ LIỆU (6 CHUYẾN/NGÀY, KHÁC NHAU THEO NGÀY) ---
-    // Khi selectedDateIndex thay đổi, danh sách chuyến xe sẽ được tạo mới
+    // --- 2. DỮ LIỆU (6 CHUYẾN/NGÀY, KHÁC NHAU THEO NGÀY) ---
     val allTrips = remember(selectedDateIndex) {
         generateMockTripsForDate(selectedDateIndex, source, destination)
     }
 
-    // --- 3. LOGIC LỌC (FILTER) ---
+    // --- 3. FILTER ---
     var sortOption by remember { mutableStateOf("Mặc định") }
     var seatFilter by remember { mutableStateOf("Tất cả") }
     var timeFilter by remember { mutableStateOf("Tất cả") }
@@ -141,7 +135,7 @@ fun FindTripScreen(
 
         // --- BODY ---
         Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
-            // DANH SÁCH NGÀY (HORIZONTAL SCROLL)
+            // DANH SÁCH NGÀY
             LazyRow(
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -182,11 +176,7 @@ fun FindTripScreen(
                             val dest = destination ?: "AN GIANG"
                             val dateStr = currentTopBarDate.replace("/", "-")
                             val tripId = trip.id
-
-                            // LẤY GIỜ CHẠY (Ví dụ: 06:15)
                             val time = trip.startTime
-
-                            // GỬI THÊM $time VÀO CUỐI ĐƯỜNG DẪN
                             navController.navigate("select_seat_screen/$tripId/$priceInt/$src/$dest/$dateStr/$time")
                         })
                     }
@@ -196,7 +186,7 @@ fun FindTripScreen(
     }
 }
 
-// --- HÀM TẠO DỮ LIỆU GIẢ LẬP (6 Chuyến/Ngày) ---
+// --- DỮ LIỆU (6 Chuyến/Ngày) ---
 fun generateMockTripsForDate(index: Int, source: String?, dest: String?): List<Trip> {
     val startPoint = source ?: "Bến xe Miền Tây"
     val endPoint = dest ?: "VP Long Xuyên"
@@ -214,7 +204,6 @@ fun generateMockTripsForDate(index: Int, source: String?, dest: String?): List<T
             endStation = endPoint,
             distanceTime = "185km - 4h",
             price = "230.000đ",
-            // TÍNH TOÁN: 28 - Số ghế đã bán của chuyến 1 (4 ghế) = 24 chỗ
             seatsAvailable = totalSeats - getSoldSeatsCount("1"),
             seatType = "Limousine"
         ),
@@ -226,7 +215,6 @@ fun generateMockTripsForDate(index: Int, source: String?, dest: String?): List<T
             endStation = endPoint,
             distanceTime = "185km - 4h",
             price = "230.000đ",
-            // TÍNH TOÁN: 28 - Số ghế đã bán của chuyến 2 (6 ghế) = 22 chỗ
             seatsAvailable = totalSeats - getSoldSeatsCount("2"),
             seatType = "Limousine"
         ),
@@ -238,7 +226,6 @@ fun generateMockTripsForDate(index: Int, source: String?, dest: String?): List<T
             endStation = endPoint,
             distanceTime = "185km - 4h",
             price = "200.000đ",
-            // TÍNH TOÁN: 28 - 5 = 23 chỗ
             seatsAvailable = totalSeats - getSoldSeatsCount("3"),
             seatType = "Giường nằm"
         ),
@@ -250,7 +237,6 @@ fun generateMockTripsForDate(index: Int, source: String?, dest: String?): List<T
             endStation = endPoint,
             distanceTime = "185km - 4h",
             price = "2000.000đ",
-            // TÍNH TOÁN: 28 - 4 = 24 chỗ
             seatsAvailable = totalSeats - getSoldSeatsCount("4"),
             seatType = "Giường nằm"
         ),
@@ -262,7 +248,6 @@ fun generateMockTripsForDate(index: Int, source: String?, dest: String?): List<T
             endStation = endPoint,
             distanceTime = "185km - 4h",
             price = "230.000đ",
-            // TÍNH TOÁN: 28 - 0 = 28 chỗ (Trống hết)
             seatsAvailable = totalSeats - getSoldSeatsCount("5"),
             seatType = "Limousine"
         ),
@@ -274,37 +259,35 @@ fun generateMockTripsForDate(index: Int, source: String?, dest: String?): List<T
             endStation = endPoint,
             distanceTime = "185km - 4h",
             price = "200.000đ",
-            // TÍNH TOÁN: 28 - 8 = 20 chỗ
             seatsAvailable = totalSeats - getSoldSeatsCount("6"),
             seatType = "Giường nằm"
         )
     )
 }
 
-// --- HÀM PHỤ TRỢ: ĐẾM SỐ GHẾ ĐÃ BÁN (LOGIC GIỐNG BÊN SELECT SEAT) ---
+// --- ĐẾM SỐ GHẾ ĐÃ BÁN  ---
 fun getSoldSeatsCount(tripId: String): Int {
-    // Copy logic danh sách ghế bán từ SelectSeatScreen sang đây để đếm
     return when (tripId) {
-        "1" -> 4  // listOf("A01", "A02", "B05", "B06").size
-        "2" -> 6  // listOf("A03", "A04", "A05", "B01", "B02", "B10").size
-        "3" -> 5  // listOf("A01", "A10", "A11", "B13", "B14").size
-        "4" -> 4  // listOf("A05", "A06", "B05", "B06").size
-        "5" -> 0  // listOf().size
-        "6" -> 8  // listOf("A01"..."A08").size
-        else -> 2 // Mặc định
+        "1" -> 4
+        "2" -> 6
+        "3" -> 5
+        "4" -> 4
+        "5" -> 0
+        "6" -> 8
+        else -> 2
     }
 }
 
-// --- HÀM XỬ LÝ NGÀY THÁNG ---
+// --- HÀM NGÀY THÁNG ---
 data class DateUIModel(
-    val dayOfWeek: String, // "Th 2"
-    val shortDate: String, // "29/09"
-    val fullDateString: String // "Thứ Hai, 29/09/2025" (Cho TopBar)
+    val dayOfWeek: String,
+    val shortDate: String,
+    val fullDateString: String
 )
 
 fun generateNext7Days(startDateString: String?): List<DateUIModel> {
     val list = mutableListOf<DateUIModel>()
-    val inputFormat = SimpleDateFormat("dd,'Th'M yyyy", Locale("vi", "VN")) // Format từ Home
+    val inputFormat = SimpleDateFormat("dd,'Th'M yyyy", Locale("vi", "VN"))
     val cal = Calendar.getInstance()
 
     try {
@@ -312,11 +295,11 @@ fun generateNext7Days(startDateString: String?): List<DateUIModel> {
             cal.time = inputFormat.parse(startDateString) ?: Date()
         }
     } catch (e: Exception) {
-        cal.time = Date() // Fallback về ngày hiện tại nếu lỗi
+        cal.time = Date()
     }
 
-    val dayOfWeekFormat = SimpleDateFormat("EEE", Locale("vi", "VN")) // "Th 2"
-    val shortDateFormat = SimpleDateFormat("dd/MM", Locale("vi", "VN")) // "29/09"
+    val dayOfWeekFormat = SimpleDateFormat("EEE", Locale("vi", "VN"))
+    val shortDateFormat = SimpleDateFormat("dd/MM", Locale("vi", "VN")) //
     val fullDateFormat = SimpleDateFormat("EEEE, dd/MM/yyyy", Locale("vi", "VN")) // TopBar
 
     for (i in 0 until 7) {
@@ -327,7 +310,6 @@ fun generateNext7Days(startDateString: String?): List<DateUIModel> {
         if (dayName.startsWith("t")) dayName = dayName.replace("t", "Th ")
         if (dayName.startsWith("T")) dayName = dayName.replace("T", "Th ").replace("Th h", "Th ")
 
-        // Fix cứng cho đẹp nếu SimpleDateFormat ra kết quả lạ
         val dayOfWeekNum = cal.get(Calendar.DAY_OF_WEEK)
         val finalDayName = when(dayOfWeekNum) {
             Calendar.SUNDAY -> "CN"
@@ -347,7 +329,7 @@ fun generateNext7Days(startDateString: String?): List<DateUIModel> {
                 fullDateString = fullDateFormat.format(cal.time).replaceFirstChar { it.uppercase() }
             )
         )
-        cal.add(Calendar.DAY_OF_MONTH, 1) // Tăng thêm 1 ngày
+        cal.add(Calendar.DAY_OF_MONTH, 1)
     }
     return list
 }
@@ -439,9 +421,9 @@ fun TripCardItem(trip: Trip, onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp), // Tăng chiều cao lên một chút cho thoáng
-        shape = RoundedCornerShape(24.dp), // Bo góc tròn trịa như hình mẫu
-        colors = CardDefaults.cardColors(containerColor = AppGreen), // Nền xanh đậm
+            .height(220.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = AppGreen),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -474,33 +456,29 @@ fun TripCardItem(trip: Trip, onClick: () -> Unit) {
             // --- TẦNG 2: THÔNG TIN BẾN & ẢNH XE ---
             Row(
                 modifier = Modifier
-                    .weight(1f) // Chiếm toàn bộ khoảng trống ở giữa
+                    .weight(1f)
                     .fillMaxWidth()
             ) {
-                // CỘT TRÁI: Timeline + Tên bến
                 Row(modifier = Modifier.weight(1.1f)) {
-                    // 1. Timeline (Cây dọc nối 2 điểm)
+                    // 1. Timeline
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .padding(top = 6.dp) // Căn chỉnh cho ngang với dòng chữ đầu
                             .width(16.dp)
                     ) {
-                        // Vòng tròn đi (Dùng Box vẽ cho chuẩn)
                         Box(
                             modifier = Modifier
                                 .size(10.dp)
                                 .background(Color.Transparent)
                                 .border(1.5.dp, AppDarkGray, CircleShape)
                         )
-                        // Đường kẻ dọc
                         Box(
                             modifier = Modifier
                                 .width(1.5.dp)
-                                .weight(1f) // Tự động kéo dài
+                                .weight(1f)
                                 .background(AppDarkGray)
                         )
-                        // Vòng tròn đến
                         Box(
                             modifier = Modifier
                                 .size(10.dp)
@@ -516,23 +494,18 @@ fun TripCardItem(trip: Trip, onClick: () -> Unit) {
                         verticalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxHeight()
                     ) {
-                        // Bến đi
                         Text(
                             text = trip.startStation,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = AppWhite
                         )
-
-                        // Khoảng cách (Nằm giữa)
                         Text(
                             text = "Khoảng cách: ${trip.distanceTime}",
                             fontSize = 11.sp,
                             color = AppWhite.copy(alpha = 0.8f),
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
-
-                        // Bến đến
                         Text(
                             text = trip.endStation,
                             fontSize = 16.sp,
@@ -542,8 +515,6 @@ fun TripCardItem(trip: Trip, onClick: () -> Unit) {
                     }
                 }
 
-                // CỘT PHẢI: Ảnh xe Bus
-                // Dùng Box để căn chỉnh ảnh không bị méo
                 Box(
                     modifier = Modifier
                         .weight(0.9f)
@@ -556,7 +527,7 @@ fun TripCardItem(trip: Trip, onClick: () -> Unit) {
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .offset(x = 10.dp) // Đẩy ảnh sang phải 1 chút cho đẹp
+                            .offset(x = 10.dp)
                     )
                 }
             }
@@ -569,9 +540,8 @@ fun TripCardItem(trip: Trip, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 1. Chip "Còn ... chỗ" (MÀU TRẮNG NHƯ HÌNH)
                 Surface(
-                    color = AppWhite, // Nền trắng
+                    color = AppWhite,
                     shape = RoundedCornerShape(20.dp),
                     modifier = Modifier.height(32.dp)
                 ) {
@@ -590,14 +560,14 @@ fun TripCardItem(trip: Trip, onClick: () -> Unit) {
                             text = "Còn ${String.format("%02d", trip.seatsAvailable)} chỗ",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = AppDarkGray // Chữ màu xám đen
+                            color = AppDarkGray
                         )
                     }
                 }
 
-                // 2. Chip "Giá" (MÀU XANH NHẠT NHƯ HÌNH)
+                // 2. Chip "Giá"
                 Surface(
-                    color = Color(0xFFA6CDC9), // Màu xanh ngọc nhạt
+                    color = Color(0xFFA6CDC9),
                     shape = RoundedCornerShape(20.dp),
                     modifier = Modifier.height(32.dp)
                 ) {

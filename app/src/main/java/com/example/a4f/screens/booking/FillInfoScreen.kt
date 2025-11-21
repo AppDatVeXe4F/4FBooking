@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Chair
 import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
@@ -44,25 +45,21 @@ fun FillInfoScreen(
     date: String?,
     selectedSeats: String,
     totalPrice: Int,
-    startTime: String
+    startTime: String,
+    tripId: String
 ) {
-    val arrivalTimeForCheckIn = calculateArrivalTime(startTime, -30)
+    val arrivalTime = calculateArrivalTime(startTime, -30)
     val endTime = calculateArrivalTime(startTime, 240)
     val displayDate = date?.replace("-", "/") ?: ""
     val displayPrice = if (totalPrice > 0) "${totalPrice/1000}.000đ" else "0đ"
-
-    // --- STATE DỮ LIỆU ---
     var userName by remember { mutableStateOf("Đang tải...") }
     var userPhone by remember { mutableStateOf("Đang tải...") }
     var userEmail by remember { mutableStateOf("Đang tải...") }
+    var fullPickupAddress by remember { mutableStateOf(source ?: "") }
+    var fullDropOffAddress by remember { mutableStateOf(destination ?: "") }
+    var showEditDialog by remember { mutableStateOf(false) }
 
-    // State cho địa chỉ cụ thể
-    var fullPickupAddress by remember { mutableStateOf(source ?: "Đang tải...") }
-    var fullDropOffAddress by remember { mutableStateOf(destination ?: "Đang tải...") }
-
-    // --- GỌI FIREBASE ---
     LaunchedEffect(Unit) {
-        // 1. Lấy thông tin User
         val auth = FirebaseAuth.getInstance()
         val currentUser = auth.currentUser
         val db = FirebaseFirestore.getInstance()
@@ -72,21 +69,39 @@ fun FillInfoScreen(
             db.collection("users").document(currentUser.uid).get()
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
-                        userName = document.getString("fullName") ?: document.getString("name") ?: "Chưa cập nhật"
-                        userPhone = document.getString("phoneNumber") ?: document.getString("phone") ?: "Chưa cập nhật"
+                        userName = document.getString("fullName") ?: document.getString("name") ?: ""
+                        userPhone = document.getString("phoneNumber") ?: document.getString("phone") ?: ""
                     } else {
-                        userName = currentUser.displayName ?: "Khách hàng"
+                        userName = currentUser.displayName ?: ""
                     }
                 }
         }
 
-        // 2. Lấy địa chỉ cụ thể từ FirestoreService
-        if (source != null) {
-            fullPickupAddress = FirestoreService.getAddressByName(source)
-        }
-        if (destination != null) {
-            fullDropOffAddress = FirestoreService.getAddressByName(destination)
-        }
+        if (source != null) fullPickupAddress = FirestoreService.getAddressByName(source)
+        if (destination != null) fullDropOffAddress = FirestoreService.getAddressByName(destination)
+    }
+
+    if (showEditDialog) {
+        EditInfoDialog(
+            currentName = userName,
+            currentPhone = userPhone,
+            currentEmail = userEmail,
+            onDismiss = { showEditDialog = false },
+            onSave = { newName, newPhone, newEmail ->
+                val userId = FirebaseAuth.getInstance().currentUser?.uid
+                if (userId != null) {
+                    val updates = mapOf(
+                        "fullName" to newName,
+                        "phoneNumber" to newPhone
+                    )
+                    FirebaseFirestore.getInstance().collection("users").document(userId).update(updates)
+                }
+                userName = newName
+                userPhone = newPhone
+                userEmail = newEmail
+                showEditDialog = false
+            }
+        )
     }
 
     Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
@@ -109,21 +124,24 @@ fun FillInfoScreen(
             BookingStepperInfo()
             Spacer(modifier = Modifier.height(16.dp))
 
-            // SECTION 1: KHÁCH HÀNG
-            SectionTitle(title = "Thông tin khách hàng", onEdit = { })
+            // SECTION 1: THÔNG TIN KHÁCH HÀNG
+            SectionTitle(
+                title = "Thông tin khách hàng",
+                onEdit = { showEditDialog = true } //
+            )
             Column(modifier = Modifier.padding(16.dp)) {
                 InfoRow(label = "Họ và tên :", value = userName)
                 InfoRow(label = "Số điện thoại :", value = userPhone)
                 InfoRow(label = "Email :", value = userEmail)
             }
 
-            // SECTION 2: TÓM TẮT VÉ
+            // SECTION 2 & 3 & FOOTER
             Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Card(colors = CardDefaults.cardColors(containerColor = TicketInfoBg), shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1.3f).height(70.dp)) {
                     Column(modifier = Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.Center) {
-                        Text(text = "$startTime - $endTime", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text("$startTime - $endTime", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         Spacer(modifier = Modifier.height(2.dp))
-                        Text(text = "$source - $destination", color = Color.White, fontSize = 11.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 14.sp)
+                        Text("$source - $destination", color = Color.White, fontSize = 11.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 14.sp)
                     }
                 }
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -146,28 +164,17 @@ fun FillInfoScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // SECTION 3: THÔNG TIN ĐÓN TRẢ
             SectionTitle(title = "Thông tin đón trả", onEdit = null)
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Điểm đón", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
-                // Hiển thị địa chỉ đầy đủ lấy từ Firebase
                 AddressBox(text = fullPickupAddress)
-
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("Lưu ý:", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                // Dòng lưu ý cũng cập nhật theo tên đầy đủ
-                Text(
-                    text = "Quý khách vui lòng có mặt tại $fullPickupAddress trước $arrivalTimeForCheckIn $displayDate để được kiểm tra thông tin trước khi lên xe.",
-                    color = AppGreen,
-                    fontSize = 13.sp,
-                    lineHeight = 18.sp
-                )
-
+                Text("Quý khách vui lòng có mặt tại $source trước $arrivalTime $displayDate để được kiểm tra thông tin trước khi lên xe.", color = AppGreen, fontSize = 13.sp, lineHeight = 18.sp)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Điểm trả", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
-                // Hiển thị địa chỉ đầy đủ lấy từ Firebase
                 AddressBox(text = fullDropOffAddress)
             }
             Spacer(modifier = Modifier.height(80.dp))
@@ -177,7 +184,12 @@ fun FillInfoScreen(
     // FOOTER
     Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.BottomCenter) {
         Button(
-            onClick = { /* TODO: Thanh toán */ },
+            onClick = {
+                val safeSource = source ?: "TP. HCM"
+                val safeDest = destination ?: "AN GIANG"
+                val safeDate = date?.replace("/", "-") ?: ""
+                navController.navigate("payment_screen/$tripId/$selectedSeats/$totalPrice/$safeSource/$safeDest/$safeDate/$userName/$userPhone/$userEmail")
+            },
             colors = ButtonDefaults.buttonColors(containerColor = AppGreen),
             modifier = Modifier.fillMaxWidth().height(50.dp),
             shape = RoundedCornerShape(12.dp)
@@ -189,7 +201,6 @@ fun FillInfoScreen(
     }
 }
 
-// ... (Các hàm hỗ trợ calculateArrivalTime, SectionTitle, InfoRow, AddressBox, BookingStepperInfo GIỮ NGUYÊN NHƯ CŨ) ...
 fun calculateArrivalTime(time: String, minuteOffset: Int): String {
     return try {
         val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -253,4 +264,84 @@ fun BookingStepperInfo() {
             Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(AppLightGreen))
         }
     }
+}
+
+@Composable
+fun EditInfoDialog(
+    currentName: String,
+    currentPhone: String,
+    currentEmail: String,
+    onDismiss: () -> Unit,
+    onSave: (String, String, String) -> Unit
+) {
+    var name by remember { mutableStateOf(currentName) }
+    var phone by remember { mutableStateOf(currentPhone) }
+    var email by remember { mutableStateOf(currentEmail) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        title = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(SectionHeaderBg, RoundedCornerShape(8.dp))
+                    .padding(8.dp)
+            ) {
+                Text("Thông tin tin khách hàng", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+        },
+        text = {
+            Column {
+                // Họ tên
+                Text("Họ tên *", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    modifier = Modifier.fillMaxWidth().background(Color(0xFFF0F0F0), RoundedCornerShape(8.dp)),
+                    shape = RoundedCornerShape(8.dp),
+                    trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.clickable { name = "" }) }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Email
+                Text("Email *", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    modifier = Modifier.fillMaxWidth().background(Color(0xFFF0F0F0), RoundedCornerShape(8.dp)),
+                    shape = RoundedCornerShape(8.dp),
+                    trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.clickable { email = "" }) }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Số điện thoại
+                Text("Số điện thoại *", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = it },
+                    modifier = Modifier.fillMaxWidth().background(Color(0xFFF0F0F0), RoundedCornerShape(8.dp)),
+                    shape = RoundedCornerShape(8.dp),
+                    trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.clickable { phone = "" }) }
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onSave(name, phone, email) },
+                colors = ButtonDefaults.buttonColors(containerColor = AppGreen),
+                modifier = Modifier.fillMaxWidth().height(45.dp),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Lưu", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = Color.White)
+            }
+        }
+    )
 }

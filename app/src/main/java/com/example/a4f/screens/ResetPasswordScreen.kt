@@ -88,7 +88,7 @@ fun ResetPasswordScreen(navController: NavController, oobCode: String?) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
-                .consumeWindowInsets(paddingValues), // ← FIX LỖI PADDING NHƯ FILE FORGOT
+                .consumeWindowInsets(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 

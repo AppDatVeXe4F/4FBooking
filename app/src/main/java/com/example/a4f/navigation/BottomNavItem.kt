@@ -12,7 +12,6 @@ sealed class BottomNavItem(
     val title: String,
     val icon: ImageVector
 ) {
-    // Đặt tên route là "_tab" để tránh trùng lặp
     object Home : BottomNavItem("home_tab", "Trang chủ", Icons.Default.Home)
     object Booking : BottomNavItem("booking_tab", "Đặt vé", Icons.Default.CalendarMonth)
     object MyTickets : BottomNavItem("tickets_tab", "Vé của tôi", Icons.Default.ConfirmationNumber)

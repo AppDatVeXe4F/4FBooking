@@ -7,10 +7,7 @@ import kotlinx.coroutines.tasks.await
 object FirestoreService {
     private val db = FirebaseFirestore.getInstance()
 
-    // ... (Hàm getLocationNames cũ giữ nguyên) ...
-
     suspend fun getLocationNames(): List<String> {
-        // ... (Code cũ giữ nguyên) ...
         return try {
             val snapshot = db.collection("locations").get().await()
             snapshot.documents.mapNotNull { it.getString("name") }
@@ -22,7 +19,6 @@ object FirestoreService {
     // --- HÀM MỚI: LẤY ĐỊA CHỈ CỤ THỂ TỪ TÊN ---
     suspend fun getAddressByName(locationName: String): String {
         return try {
-            // Tìm trong collection "locations" xem document nào có "name" bằng với tên địa điểm
             val snapshot = db.collection("locations")
                 .whereEqualTo("name", locationName)
                 .get()

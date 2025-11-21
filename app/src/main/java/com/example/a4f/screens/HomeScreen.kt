@@ -60,7 +60,6 @@ fun HomeScreen(navController: NavController) {
     val dateFormat = SimpleDateFormat("dd,'Th'M yyyy", Locale("vi", "VN"))
     val todayDate = dateFormat.format(calendar.time)
 
-    // Các biến State lưu dữ liệu người dùng chọn
     var diemDi by rememberSaveable { mutableStateOf("") }
     var diemDen by rememberSaveable { mutableStateOf("") }
     var ngayDi by rememberSaveable { mutableStateOf(todayDate) }
@@ -95,7 +94,6 @@ fun HomeScreen(navController: NavController) {
                     TextButton(onClick = {
                         showDatePicker = false
                         datePickerState.selectedDateMillis?.let { millis ->
-                            // Gọi hàm convert đã sửa format
                             ngayDi = convertMillisToDateString(millis)
                         }
                     }) { Text("OK") }
@@ -256,7 +254,6 @@ fun SearchSection(
 
                     // 2. CHUYỂN SANG TAB ĐẶT VÉ
                     navController.navigate(BottomNavItem.Booking.route) {
-                        // Xóa stack để tránh bị back vòng vo
                         popUpTo(navController.graph.startDestinationId) {
                             saveState = true
                         }
