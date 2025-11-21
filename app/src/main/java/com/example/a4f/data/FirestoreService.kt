@@ -7,17 +7,36 @@ import kotlinx.coroutines.tasks.await
 object FirestoreService {
     private val db = FirebaseFirestore.getInstance()
 
-    // Hàm lấy danh sách tên địa điểm (VP Bến xe Miền Tây, VP Long Xuyên...)
+    // ... (Hàm getLocationNames cũ giữ nguyên) ...
+
     suspend fun getLocationNames(): List<String> {
+        // ... (Code cũ giữ nguyên) ...
         return try {
             val snapshot = db.collection("locations").get().await()
-            // Lấy trường "name" từ mỗi document
             snapshot.documents.mapNotNull { it.getString("name") }
         } catch (e: Exception) {
-            Log.e("FirestoreService", "Lỗi lấy địa điểm: ${e.message}")
-            // Trả về danh sách mặc định nếu lỗi mạng
-            listOf("TP. Hồ Chí Minh", "An Giang", "Kiên Giang", "Cần Thơ")
+            listOf("TP. Hồ Chí Minh", "An Giang")
+        }
+    }
+
+    // --- HÀM MỚI: LẤY ĐỊA CHỈ CỤ THỂ TỪ TÊN ---
+    suspend fun getAddressByName(locationName: String): String {
+        return try {
+            // Tìm trong collection "locations" xem document nào có "name" bằng với tên địa điểm
+            val snapshot = db.collection("locations")
+                .whereEqualTo("name", locationName)
+                .get()
+                .await()
+
+            if (!snapshot.isEmpty) {
+                // Lấy trường "address" của kết quả đầu tiên tìm được
+                val address = snapshot.documents[0].getString("address") ?: ""
+                if (address.isNotEmpty()) "$locationName: $address" else locationName
+            } else {
+                locationName // Không tìm thấy thì trả về tên gốc
+            }
+        } catch (e: Exception) {
+            locationName // Lỗi thì trả về tên gốc
         }
     }
 }
-

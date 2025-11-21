@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.a4f.data.FirestoreService // Import Service
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -45,41 +46,46 @@ fun FillInfoScreen(
     totalPrice: Int,
     startTime: String
 ) {
-    // 1. Tính toán giờ:
-    // Giờ có mặt (trước 30 phút)
     val arrivalTimeForCheckIn = calculateArrivalTime(startTime, -30)
-    // Giờ đến nơi (Giả sử hành trình 4 tiếng = 240 phút) để hiển thị vào thẻ vé
     val endTime = calculateArrivalTime(startTime, 240)
-
     val displayDate = date?.replace("-", "/") ?: ""
     val displayPrice = if (totalPrice > 0) "${totalPrice/1000}.000đ" else "0đ"
 
-    // Firebase logic
+    // --- STATE DỮ LIỆU ---
     var userName by remember { mutableStateOf("Đang tải...") }
     var userPhone by remember { mutableStateOf("Đang tải...") }
     var userEmail by remember { mutableStateOf("Đang tải...") }
 
+    // State cho địa chỉ cụ thể
+    var fullPickupAddress by remember { mutableStateOf(source ?: "Đang tải...") }
+    var fullDropOffAddress by remember { mutableStateOf(destination ?: "Đang tải...") }
+
+    // --- GỌI FIREBASE ---
     LaunchedEffect(Unit) {
+        // 1. Lấy thông tin User
         val auth = FirebaseAuth.getInstance()
         val currentUser = auth.currentUser
         val db = FirebaseFirestore.getInstance()
 
         if (currentUser != null) {
-            userEmail = currentUser.email ?: "Chưa có email"
+            userEmail = currentUser.email ?: ""
             db.collection("users").document(currentUser.uid).get()
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
-                        userName = document.getString("fullName") ?: document.getString("name") ?: "Chưa cập nhật tên"
-                        userPhone = document.getString("phoneNumber") ?: document.getString("phone") ?: "Chưa cập nhật SĐT"
+                        userName = document.getString("fullName") ?: document.getString("name") ?: "Chưa cập nhật"
+                        userPhone = document.getString("phoneNumber") ?: document.getString("phone") ?: "Chưa cập nhật"
                     } else {
                         userName = currentUser.displayName ?: "Khách hàng"
-                        userPhone = "Chưa cập nhật"
                     }
                 }
-                .addOnFailureListener { userName = "Lỗi kết nối" }
-        } else {
-            userEmail = "Chưa đăng nhập"
-            userName = "Khách vãng lai"
+        }
+
+        // 2. Lấy địa chỉ cụ thể từ FirestoreService
+        if (source != null) {
+            fullPickupAddress = FirestoreService.getAddressByName(source)
+        }
+        if (destination != null) {
+            fullDropOffAddress = FirestoreService.getAddressByName(destination)
         }
     }
 
@@ -103,40 +109,23 @@ fun FillInfoScreen(
             BookingStepperInfo()
             Spacer(modifier = Modifier.height(16.dp))
 
-            // SECTION 1: THÔNG TIN KHÁCH HÀNG
-            SectionTitle(title = "Thông tin khách hàng", onEdit = { /* TODO */ })
+            // SECTION 1: KHÁCH HÀNG
+            SectionTitle(title = "Thông tin khách hàng", onEdit = { })
             Column(modifier = Modifier.padding(16.dp)) {
                 InfoRow(label = "Họ và tên :", value = userName)
                 InfoRow(label = "Số điện thoại :", value = userPhone)
                 InfoRow(label = "Email :", value = userEmail)
             }
 
-            // SECTION 2: TÓM TẮT VÉ (ĐÃ CHỈNH SỬA THEO YÊU CẦU)
+            // SECTION 2: TÓM TẮT VÉ
             Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Cục Giờ & Tuyến (Lớn nhất) - ĐÃ SỬA NỘI DUNG
                 Card(colors = CardDefaults.cardColors(containerColor = TicketInfoBg), shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1.3f).height(70.dp)) {
                     Column(modifier = Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.Center) {
-                        // Dòng 1: Giờ đi - Giờ đến
-                        Text(
-                            text = "$startTime - $endTime",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
-                        )
+                        Text(text = "$startTime - $endTime", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         Spacer(modifier = Modifier.height(2.dp))
-                        // Dòng 2: Bến đi - Bến đến
-                        Text(
-                            text = "$source - $destination",
-                            color = Color.White,
-                            fontSize = 11.sp,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            lineHeight = 14.sp
-                        )
+                        Text(text = "$source - $destination", color = Color.White, fontSize = 11.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 14.sp)
                     }
                 }
-
-                // Cục bên phải (Giá & Ghế)
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Card(colors = CardDefaults.cardColors(containerColor = TicketInfoBg), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth().height(31.dp)) {
                         Row(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
@@ -162,12 +151,14 @@ fun FillInfoScreen(
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Điểm đón", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
-                AddressBox(text = "$source")
+                // Hiển thị địa chỉ đầy đủ lấy từ Firebase
+                AddressBox(text = fullPickupAddress)
 
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("Lưu ý:", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                // Dòng lưu ý cũng cập nhật theo tên đầy đủ
                 Text(
-                    text = "Quý khách vui lòng có mặt tại $source trước $arrivalTimeForCheckIn $displayDate để được kiểm tra thông tin trước khi lên xe.",
+                    text = "Quý khách vui lòng có mặt tại $fullPickupAddress trước $arrivalTimeForCheckIn $displayDate để được kiểm tra thông tin trước khi lên xe.",
                     color = AppGreen,
                     fontSize = 13.sp,
                     lineHeight = 18.sp
@@ -176,7 +167,8 @@ fun FillInfoScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Điểm trả", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
-                AddressBox(text = "$destination")
+                // Hiển thị địa chỉ đầy đủ lấy từ Firebase
+                AddressBox(text = fullDropOffAddress)
             }
             Spacer(modifier = Modifier.height(80.dp))
         }
@@ -197,7 +189,7 @@ fun FillInfoScreen(
     }
 }
 
-// HÀM HỖ TRỢ TÍNH GIỜ
+// ... (Các hàm hỗ trợ calculateArrivalTime, SectionTitle, InfoRow, AddressBox, BookingStepperInfo GIỮ NGUYÊN NHƯ CŨ) ...
 fun calculateArrivalTime(time: String, minuteOffset: Int): String {
     return try {
         val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -206,12 +198,9 @@ fun calculateArrivalTime(time: String, minuteOffset: Int): String {
         calendar.time = date
         calendar.add(Calendar.MINUTE, minuteOffset)
         sdf.format(calendar.time)
-    } catch (e: Exception) {
-        time
-    }
+    } catch (e: Exception) { time }
 }
 
-// ... (Giữ nguyên các hàm SectionTitle, InfoRow, AddressBox, BookingStepperInfo như cũ) ...
 @Composable
 fun SectionTitle(title: String, onEdit: (() -> Unit)? = null) {
     Row(modifier = Modifier.fillMaxWidth().background(SectionHeaderBg).padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
