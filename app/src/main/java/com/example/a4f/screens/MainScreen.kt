@@ -24,6 +24,8 @@ import com.example.a4f.screens.booking.FillInfoScreen
 import com.example.a4f.screens.booking.FindTripScreen
 import com.example.a4f.screens.booking.PaymentScreen
 import com.example.a4f.screens.booking.SelectSeatScreen
+import com.example.a4f.screens.*
+
 
 @Composable
 fun MainScreen(navController: NavHostController) {
@@ -44,12 +46,17 @@ fun MainScreen(navController: NavHostController) {
                 val currentDestination = navBackStackEntry?.destination
 
                 bottomNavItems.forEach { item ->
-                    val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
+                    val isSelected = currentDestination?.hierarchy?.any {
+                        it.route == item.route
+                    } == true
+
                     NavigationBarItem(
                         selected = isSelected,
                         onClick = {
                             bottomNavController.navigate(item.route) {
-                                popUpTo(bottomNavController.graph.findStartDestination().id) { saveState = true }
+                                popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -61,46 +68,41 @@ fun MainScreen(navController: NavHostController) {
             }
         }
     ) { innerPadding ->
+
         NavHost(
             navController = bottomNavController,
             startDestination = BottomNavItem.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            // 1. Tab Trang chủ
+            // 1. Trang chủ
             composable(BottomNavItem.Home.route) {
                 HomeScreen(navController = bottomNavController)
             }
 
             // 2. Tab Đặt vé
-            composable(BottomNavItem.Booking.route) { backStackEntry ->
-                val savedStateHandle = bottomNavController.previousBackStackEntry?.savedStateHandle
-                val source = savedStateHandle?.get<String>("source")
-                val destination = savedStateHandle?.get<String>("destination")
-                val date = savedStateHandle?.get<String>("date")
-
+            composable(BottomNavItem.Booking.route) {
+                val savedState = bottomNavController.previousBackStackEntry?.savedStateHandle
                 FindTripScreen(
                     navController = bottomNavController,
-                    source = source,
-                    destination = destination,
-                    date = date
+                    source = savedState?.get("source"),
+                    destination = savedState?.get("destination"),
+                    date = savedState?.get("date")
                 )
             }
 
-            // 3. Tab Vé của tôi
+            // ⭐ 3. Tab Vé của tôi (MỚI)
             composable(BottomNavItem.MyTickets.route) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Vé của tôi", fontSize = 20.sp)
-                }
+                MyTicketsScreen(navController = bottomNavController)
             }
 
-            // 4. Tab Cá nhân
+            // 4. Cá nhân
             composable(BottomNavItem.Profile.route) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Cá nhân", fontSize = 20.sp)
-                }
+                Box(Modifier.fillMaxSize(), Alignment.Center) { Text("Cá nhân", fontSize = 20.sp) }
             }
 
-            // 5. MÀN HÌNH CHỌN GHẾ
+            /** ---------- CHỨC NĂNG ĐẶT VÉ GIỮ NGUYÊN ---------- */
+
+            // Chọn ghế
             composable(
                 route = "select_seat_screen/{tripId}/{price}/{source}/{destination}/{date}/{startTime}",
                 arguments = listOf(
@@ -109,28 +111,21 @@ fun MainScreen(navController: NavHostController) {
                     navArgument("source") { type = NavType.StringType },
                     navArgument("destination") { type = NavType.StringType },
                     navArgument("date") { type = NavType.StringType },
-                    navArgument("startTime") { type = NavType.StringType }
+                    navArgument("startTime") { type = NavType.StringType },
                 )
-            ) { backStackEntry ->
-                val tripId = backStackEntry.arguments?.getString("tripId") ?: "1"
-                val price = backStackEntry.arguments?.getInt("price") ?: 0
-                val source = backStackEntry.arguments?.getString("source")
-                val destination = backStackEntry.arguments?.getString("destination")
-                val date = backStackEntry.arguments?.getString("date")
-                val startTime = backStackEntry.arguments?.getString("startTime") ?: "00:00"
-
+            ) { entry ->
                 SelectSeatScreen(
                     navController = bottomNavController,
-                    tripId = tripId,
-                    pricePerTicket = price,
-                    source = source,
-                    destination = destination,
-                    date = date,
-                    startTime = startTime
+                    tripId = entry.arguments?.getString("tripId") ?: "",
+                    pricePerTicket = entry.arguments?.getInt("price") ?: 0,
+                    source = entry.arguments?.getString("source"),
+                    destination = entry.arguments?.getString("destination"),
+                    date = entry.arguments?.getString("date"),
+                    startTime = entry.arguments?.getString("startTime") ?: "00:00"
                 )
             }
 
-            // 6. MÀN HÌNH ĐIỀN THÔNG TIN
+            // Điền thông tin
             composable(
                 route = "fill_info_screen/{selectedSeats}/{totalPrice}/{source}/{destination}/{date}/{startTime}/{tripId}",
                 arguments = listOf(
@@ -140,30 +135,22 @@ fun MainScreen(navController: NavHostController) {
                     navArgument("destination") { type = NavType.StringType },
                     navArgument("date") { type = NavType.StringType },
                     navArgument("startTime") { type = NavType.StringType },
-                    navArgument("tripId") { type = NavType.StringType } // <--- KHAI BÁO NHẬN BIẾN tripId
+                    navArgument("tripId") { type = NavType.StringType }
                 )
-            ) { backStackEntry ->
-                val selectedSeats = backStackEntry.arguments?.getString("selectedSeats") ?: ""
-                val totalPrice = backStackEntry.arguments?.getInt("totalPrice") ?: 0
-                val source = backStackEntry.arguments?.getString("source")
-                val destination = backStackEntry.arguments?.getString("destination")
-                val date = backStackEntry.arguments?.getString("date")
-                val startTime = backStackEntry.arguments?.getString("startTime") ?: "00:00"
-                val tripId = backStackEntry.arguments?.getString("tripId") ?: "" // <--- LẤY BIẾN RA
-
+            ) { entry ->
                 FillInfoScreen(
                     navController = bottomNavController,
-                    source = source,
-                    destination = destination,
-                    date = date,
-                    selectedSeats = selectedSeats,
-                    totalPrice = totalPrice,
-                    startTime = startTime,
-                    tripId = tripId
+                    selectedSeats = entry.arguments?.getString("selectedSeats") ?: "",
+                    totalPrice = entry.arguments?.getInt("totalPrice") ?: 0,
+                    source = entry.arguments?.getString("source"),
+                    destination = entry.arguments?.getString("destination"),
+                    date = entry.arguments?.getString("date"),
+                    startTime = entry.arguments?.getString("startTime") ?: "",
+                    tripId = entry.arguments?.getString("tripId") ?: ""
                 )
             }
 
-            // 7. MÀN HÌNH THANH TOÁN
+            // Thanh toán
             composable(
                 route = "payment_screen/{tripId}/{selectedSeats}/{totalPrice}/{source}/{destination}/{date}/{userName}/{userPhone}/{userEmail}",
                 arguments = listOf(
@@ -177,28 +164,18 @@ fun MainScreen(navController: NavHostController) {
                     navArgument("userPhone") { type = NavType.StringType },
                     navArgument("userEmail") { type = NavType.StringType }
                 )
-            ) { backStackEntry ->
-                val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
-                val selectedSeats = backStackEntry.arguments?.getString("selectedSeats") ?: ""
-                val totalPrice = backStackEntry.arguments?.getInt("totalPrice") ?: 0
-                val source = backStackEntry.arguments?.getString("source")
-                val destination = backStackEntry.arguments?.getString("destination")
-                val date = backStackEntry.arguments?.getString("date")
-                val userName = backStackEntry.arguments?.getString("userName") ?: ""
-                val userPhone = backStackEntry.arguments?.getString("userPhone") ?: ""
-                val userEmail = backStackEntry.arguments?.getString("userEmail") ?: ""
-
+            ) { entry ->
                 PaymentScreen(
                     navController = bottomNavController,
-                    source = source,
-                    destination = destination,
-                    date = date,
-                    totalPrice = totalPrice,
-                    tripId = tripId,
-                    selectedSeats = selectedSeats,
-                    userName = userName,
-                    userPhone = userPhone,
-                    userEmail = userEmail
+                    tripId = entry.arguments?.getString("tripId") ?: "",
+                    selectedSeats = entry.arguments?.getString("selectedSeats") ?: "",
+                    totalPrice = entry.arguments?.getInt("totalPrice") ?: 0,
+                    source = entry.arguments?.getString("source"),
+                    destination = entry.arguments?.getString("destination"),
+                    date = entry.arguments?.getString("date"),
+                    userName = entry.arguments?.getString("userName") ?: "",
+                    userPhone = entry.arguments?.getString("userPhone") ?: "",
+                    userEmail = entry.arguments?.getString("userEmail") ?: ""
                 )
             }
         }
