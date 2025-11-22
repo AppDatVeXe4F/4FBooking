@@ -52,7 +52,8 @@ object FirestoreRepository {
             "trip" to db.collection("trips").document(tripId),
             "user" to db.collection("users").document(userId),
             "source" to sourceName,
-            "destination" to destinationName
+            "destination" to destinationName,
+            "isPaid" to false
         )
 
         db.collection("bookings")
@@ -80,5 +81,11 @@ object FirestoreRepository {
             .update("bookedSeats", FieldValue.arrayUnion(*newSeats.toTypedArray()))
             .addOnSuccessListener { Log.d("Firestore", "Cập nhật ghế thành công!") }
             .addOnFailureListener { e -> Log.e("Firestore", "Lỗi bookSeats: $e") }
+    }
+    fun markBookingPaid(bookingId: String) {
+        db.collection("bookings").document(bookingId)
+            .update("isPaid", true)
+            .addOnSuccessListener { Log.d("Firestore", "Booking $bookingId đã thanh toán") }
+            .addOnFailureListener { e -> Log.e("Firestore", "Lỗi markBookingPaid: $e") }
     }
 }

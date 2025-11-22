@@ -11,6 +11,7 @@ data class Ticket(
     val totalPrice: Long = 0,
     val trip: DocumentReference? = null,
     val user: DocumentReference? = null,
-    val source: String = "",       // thêm
-    val destination: String = ""   // thêm
+    val source: String = "",
+    val destination: String = "",
+    val isPaid: Boolean = false // ✅ trạng thái thanh toán
 )

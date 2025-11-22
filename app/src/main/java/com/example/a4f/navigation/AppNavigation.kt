@@ -5,13 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
-import com.example.a4f.screens.LoginScreen
-import com.example.a4f.screens.OnboardingScreen
-import com.example.a4f.screens.RegisterScreen
-import com.example.a4f.screens.SplashScreen
-import com.example.a4f.screens.ForgotPasswordScreen
-import com.example.a4f.screens.MainScreen
+import com.example.a4f.screens.*
 
 object AppRoutes {
     const val SPLASH = "splash"
@@ -20,6 +14,8 @@ object AppRoutes {
     const val REGISTER = "register"
     const val HOME = "home"
     const val FORGOT_PASSWORD = "forgot_password"
+    const val MY_TICKETS = "my_tickets"
+    const val TICKET_DETAIL = "ticket_detail"
 }
 
 @Composable
@@ -30,23 +26,20 @@ fun AppNavigation() {
         navController = navController,
         startDestination = AppRoutes.SPLASH
     ) {
-        composable(AppRoutes.SPLASH) { SplashScreen(navController = navController) }
-        composable(AppRoutes.ONBOARDING) { OnboardingScreen(navController = navController) }
-        composable(AppRoutes.LOGIN) { LoginScreen(navController = navController) }
-        composable(AppRoutes.REGISTER) { RegisterScreen(navController = navController) }
+        composable(AppRoutes.SPLASH) { SplashScreen(navController) }
+        composable(AppRoutes.ONBOARDING) { OnboardingScreen(navController) }
+        composable(AppRoutes.LOGIN) { LoginScreen(navController) }
+        composable(AppRoutes.REGISTER) { RegisterScreen(navController) }
+        composable(AppRoutes.HOME) { MainScreen(navController = navController) } // Truyền navController gốc
+        composable(AppRoutes.FORGOT_PASSWORD) { ForgotPasswordScreen(navController) }
 
-        // MÀN HÌNH CHÍNH
-        composable(AppRoutes.HOME) {
-            // Truyền đúng tham số navController
-            MainScreen(navController = navController)
+        composable(AppRoutes.MY_TICKETS) {
+            MyTicketsScreen(navController = navController) // navController chính
         }
 
-        composable(AppRoutes.FORGOT_PASSWORD) { ForgotPasswordScreen(navController = navController) }
+        composable("${AppRoutes.TICKET_DETAIL}/{ticketId}") { backStackEntry ->
+            val ticketId = backStackEntry.arguments?.getString("ticketId") ?: ""
+            TicketDetailScreen(navController, ticketId)
+        }
     }
-}
-
-// Placeholder Onboarding
-@Composable
-fun OnboardingScreen(navController: NavHostController) {
-    androidx.compose.material3.Text("Onboarding")
 }

@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.a4f.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,7 +27,6 @@ import com.example.a4f.data.TicketListViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTicketsScreen(
     navController: NavHostController,
@@ -95,8 +97,8 @@ fun MyTicketsScreen(
                     Tab(
                         selected = selectedTab == index,
                         onClick = { selectedTab = index },
-                        selectedContentColor = Color(0xFF006A60), // màu xanh khi được chọn
-                        unselectedContentColor = Color.Gray,       // màu xám khi không chọn
+                        selectedContentColor = Color(0xFF006A60),
+                        unselectedContentColor = Color.Gray,
                         text = { Text(title, fontSize = 16.sp, fontWeight = FontWeight.Medium) }
                     )
                 }
@@ -120,7 +122,10 @@ fun MyTicketsScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(filteredTickets) { ticket ->
-                        TicketCard(ticket)
+                        TicketCard(ticket) {
+                            // click vé vẫn điều hướng
+                            navController.navigate("ticket_detail/${ticket.id}")
+                        }
                     }
                 }
             }
@@ -129,24 +134,26 @@ fun MyTicketsScreen(
 }
 
 @Composable
-fun TicketCard(ticket: Ticket) {
+fun TicketCard(ticket: Ticket, onClick: () -> Unit) {
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .shadow(12.dp, RoundedCornerShape(18.dp)),  // tăng độ nổi
+            .shadow(12.dp, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .clickable { onClick() },
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White) // nền sáng
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Box(
             modifier = Modifier
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFFE8F4F2),   // xanh pastel rất nhạt → sáng
-                            Color(0xFFD6ECE9)    // xanh pastel đậm hơn chút
+                            Color(0xFFE8F4F2),
+                            Color(0xFFD6ECE9)
                         )
                     )
                 )
@@ -162,9 +169,9 @@ fun TicketCard(ticket: Ticket) {
                             .clip(CircleShape)
                             .background(
                                 when (ticket.status.lowercase()) {
-                                    "confirmed" -> Color(0xFF2E7D32)  // xanh đậm rõ
-                                    "pending" -> Color(0xFFF9A825)    // vàng nổi bật
-                                    "cancelled" -> Color(0xFFD32F2F)  // đỏ đậm rõ
+                                    "confirmed" -> Color(0xFF2E7D32)
+                                    "pending" -> Color(0xFFF9A825)
+                                    "cancelled" -> Color(0xFFD32F2F)
                                     else -> Color.Gray
                                 }
                             )
@@ -172,7 +179,7 @@ fun TicketCard(ticket: Ticket) {
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         ticket.status.uppercase(),
-                        color = Color(0xFF0A3D3A), // xanh đậm
+                        color = Color(0xFF0A3D3A),
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -181,7 +188,7 @@ fun TicketCard(ticket: Ticket) {
                 Divider(color = Color(0xFF49736E).copy(alpha = 0.4f), thickness = 1.dp)
 
                 // --- INFO TEXT ---
-                val textColor = Color(0xFF1B4F4A) // xanh chữ đậm, nổi bật
+                val textColor = Color(0xFF1B4F4A)
 
                 Text(
                     "Ngày: ${ticket.bookedAt?.toDate()?.let { dateFormat.format(it) } ?: "-"}",
