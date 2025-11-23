@@ -1,8 +1,7 @@
-// FirestoreRepository.kt
 package com.example.a4f.data
 
 import android.util.Log
-import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -10,7 +9,7 @@ import kotlinx.coroutines.tasks.await
 object FirestoreRepository {
     private val db = FirebaseFirestore.getInstance()
 
-    // Lấy thông tin chuyến xe
+    // Hàm lấy thông tin chuyến xe
     suspend fun getTripInfo(tripId: String): Pair<List<String>, Int> {
         return try {
             val tripDoc = db.collection("trips").document(tripId).get().await()
@@ -18,6 +17,7 @@ object FirestoreRepository {
                 val bookedSeats = tripDoc.get("bookedSeats") as? List<String> ?: emptyList()
                 val busTypePath = tripDoc.getString("busType")
                 var price = 0
+
                 if (!busTypePath.isNullOrEmpty()) {
                     val cleanPath = busTypePath.removePrefix("/")
                     val busTypeDoc = db.document(cleanPath).get().await()
@@ -30,62 +30,33 @@ object FirestoreRepository {
                 Pair(emptyList(), 0)
             }
         } catch (e: Exception) {
-            Log.e("Firestore", "Lỗi getTripInfo: ${e.message}")
+            Log.e("Firestore", "Lỗi: ${e.message}")
             Pair(emptyList(), 0)
         }
     }
 
-    // Đặt vé (thêm booking mới)
-    fun createBooking(
-        tripId: String,
-        userId: String,
-        seats: List<String>,
-        totalPrice: Long,
-        sourceName: String,
-        destinationName: String
-    ) {
+    // Hàm đặt vé (ĐÃ XÓA TODO)
+    fun bookSeats(tripId: String, newSeats: List<String>, totalPrice: Int) {
+        // 1. Cập nhật ghế vào chuyến xe
+        db.collection("trips").document(tripId)
+            .update("bookedSeats", FieldValue.arrayUnion(*newSeats.toTypedArray()))
+            .addOnFailureListener { e -> Log.e("Firestore", "Lỗi update ghế: $e") }
+
+        // 2. Lưu đơn hàng
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userId = currentUser?.uid ?: "guest"
+
         val bookingData = hashMapOf(
-            "bookedAt" to Timestamp.now(),
-            "seatNumber" to seats,
-            "status" to "confirmed",
+            "bookedAt" to FieldValue.serverTimestamp(),
+            "seatNumber" to newSeats,
             "totalPrice" to totalPrice,
-            "trip" to db.collection("trips").document(tripId),
-            "user" to db.collection("users").document(userId),
-            "source" to sourceName,
-            "destination" to destinationName,
-            "isPaid" to false
+            "status" to "confirmed",
+            "tripId" to tripId,
+            "userId" to userId
         )
 
         db.collection("bookings")
             .add(bookingData)
-            .addOnSuccessListener { Log.d("Firestore", "Đặt vé thành công!") }
-            .addOnFailureListener { e -> Log.e("Firestore", "Lỗi createBooking: $e") }
-    }
-
-    // Cập nhật tuyến cho booking đã có
-    fun updateBookingRoute(bookingId: String, sourceName: String, destinationName: String) {
-        db.collection("bookings").document(bookingId)
-            .update(
-                mapOf(
-                    "source" to sourceName,
-                    "destination" to destinationName
-                )
-            )
-            .addOnSuccessListener { Log.d("Firestore", "Cập nhật tuyến thành công") }
-            .addOnFailureListener { e -> Log.e("Firestore", "Lỗi khi cập nhật tuyến: $e") }
-    }
-
-    // Đặt vé: cập nhật danh sách ghế của chuyến
-    fun bookSeats(tripId: String, newSeats: List<String>) {
-        db.collection("trips").document(tripId)
-            .update("bookedSeats", FieldValue.arrayUnion(*newSeats.toTypedArray()))
-            .addOnSuccessListener { Log.d("Firestore", "Cập nhật ghế thành công!") }
-            .addOnFailureListener { e -> Log.e("Firestore", "Lỗi bookSeats: $e") }
-    }
-    fun markBookingPaid(bookingId: String) {
-        db.collection("bookings").document(bookingId)
-            .update("isPaid", true)
-            .addOnSuccessListener { Log.d("Firestore", "Booking $bookingId đã thanh toán") }
-            .addOnFailureListener { e -> Log.e("Firestore", "Lỗi markBookingPaid: $e") }
+            .addOnSuccessListener { Log.d("Firestore", "Lưu đơn hàng thành công!") }
     }
 }

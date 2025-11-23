@@ -178,6 +178,26 @@ fun MainScreen(navController: NavHostController) {
                     userEmail = entry.arguments?.getString("userEmail") ?: ""
                 )
             }
+
+            /// 8. MÀN HÌNH MÃ QR
+            composable(
+                route = "qr_code_screen/{totalPrice}/{tripId}",
+                arguments = listOf(
+                    navArgument("totalPrice") { type = NavType.IntType },
+                    navArgument("tripId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val totalPrice = backStackEntry.arguments?.getInt("totalPrice") ?: 0
+                val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+
+                // Gọi màn hình QRCodeScreen
+                // Nếu báo đỏ chữ QRCodeScreen, hãy trỏ chuột vào và bấm Alt+Enter để Import
+                com.example.a4f.screens.booking.QRCodeScreen(
+                    navController = bottomNavController,
+                    totalPrice = totalPrice,
+                    tripId = tripId
+                )
+            }
         }
     }
 }

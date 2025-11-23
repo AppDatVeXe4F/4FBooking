@@ -1,5 +1,6 @@
 package com.example.a4f.screens.booking
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -13,7 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -37,9 +40,12 @@ fun PaymentScreen(
     userPhone: String,
     userEmail: String
 ) {
+    val context = LocalContext.current // Để hiện thông báo lỗi nếu có
     val displayDate = date?.replace("-", "/") ?: ""
     val formattedPrice = NumberFormat.getNumberInstance(Locale("vi", "VN")).format(totalPrice)
-    var timeLeft by remember { mutableIntStateOf(600) } // 600 giây = 10 phút
+
+    var timeLeft by remember { mutableIntStateOf(600) }
+    var showCancelDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         while (timeLeft > 0) {
@@ -52,12 +58,27 @@ fun PaymentScreen(
     val seconds = timeLeft % 60
     val timeString = String.format("%02d:%02d", minutes, seconds)
 
+    if (showCancelDialog) {
+        AlertDialog(
+            onDismissRequest = { showCancelDialog = false },
+            containerColor = Color.White,
+            title = { Text("Thông báo", fontWeight = FontWeight.Bold, fontSize = 18.sp) },
+            text = { Text("Bạn có chắc chắn muốn hủy thao tác này ?", fontSize = 16.sp) },
+            dismissButton = { TextButton(onClick = { showCancelDialog = false }) { Text("Hủy", color = Color.Gray) } },
+            confirmButton = {
+                TextButton(onClick = { showCancelDialog = false; navController.popBackStack() }) {
+                    Text("Đồng ý", color = AppGreen, fontWeight = FontWeight.Bold)
+                }
+            }
+        )
+    }
+
     Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
-        // 1. HEADER
+        // HEADER
         Column(modifier = Modifier.fillMaxWidth().background(AppGreen)) {
             Spacer(modifier = Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
             Box(modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                IconButton(onClick = { navController.popBackStack() }, modifier = Modifier.align(Alignment.CenterStart)) {
+                IconButton(onClick = { showCancelDialog = true }, modifier = Modifier.align(Alignment.CenterStart)) {
                     Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
                 }
                 Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -67,36 +88,20 @@ fun PaymentScreen(
             }
         }
 
-        // 2. BODY
+        // BODY
         Column(modifier = Modifier.weight(1f).padding(16.dp)) {
             BookingStepperPayment()
             Spacer(modifier = Modifier.height(24.dp))
-
-            // Thông tin khách hàng
             InfoTextRow("Họ và tên :", userName)
             InfoTextRow("Số điện thoại :", userPhone)
             InfoTextRow("Email :", userEmail)
-
             Spacer(modifier = Modifier.height(24.dp))
-
-            // Thanh toán
-            Card(
-                colors = CardDefaults.cardColors(containerColor = PaymentBoxBg),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Card(colors = CardDefaults.cardColors(containerColor = PaymentBoxBg), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     PaymentRow("Giá vé", "${formattedPrice}đ")
                     PaymentRow("Phí thanh toán", "0đ")
-
                     Spacer(modifier = Modifier.height(24.dp))
-
-                    // Tổng tiền
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Bottom
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
                         Text("Thanh toán mặc định với", color = AppGreen, fontSize = 14.sp)
                         Text("${formattedPrice}đ", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, color = Color.Black)
                     }
@@ -104,28 +109,33 @@ fun PaymentScreen(
             }
         }
 
-        // 3. FOOTER
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Thời gian giữ vé còn lại $timeString",
-                color = AppGreen,
-                fontSize = 14.sp
-            )
+        // FOOTER (Nút Thanh Toán an toàn)
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "Thời gian giữ vé còn lại $timeString", color = AppGreen, fontSize = 14.sp)
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
                 onClick = {
-                    // --- THANH TOÁN THÀNH CÔNG ---
-                    // 1. Cập nhật ghế đã bán lên Firebase
-                    val seatsList = selectedSeats.split(",").map { it.trim() }
-                    FirestoreRepository.bookSeats(tripId, seatsList)
+                    // --- BỌC AN TOÀN CHỐNG SẬP APP ---
+                    try {
+                        // 1. Kiểm tra dữ liệu đầu vào
+                        if (tripId.isBlank()) {
+                            Toast.makeText(context, "Lỗi: Không tìm thấy mã chuyến xe!", Toast.LENGTH_SHORT).show()
+                            return@Button // Dừng lại, không chạy tiếp
+                        }
 
-                    // 2. Quay về trang chủ
-                    navController.navigate("home") {
-                        popUpTo(0) // Xóa sạch lịch sử
+                        // 2. Gọi hàm lưu Firebase
+                        val seatsList = selectedSeats.split(",").map { it.trim() }
+                        FirestoreRepository.bookSeats(tripId, seatsList, totalPrice)
+
+                        // 3. Chuyển màn hình
+                        navController.navigate("qr_code_screen/$totalPrice/$tripId")
+
+                    } catch (e: NotImplementedError) {
+                        Toast.makeText(context, "Lỗi: Còn mã TODO chưa xóa trong code!", Toast.LENGTH_LONG).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Lỗi hệ thống: ${e.message}", Toast.LENGTH_LONG).show()
+                        e.printStackTrace()
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = AppGreen),
@@ -138,14 +148,10 @@ fun PaymentScreen(
     }
 }
 
-// --- COMPONENTS CON ---
-
+// Components con
 @Composable
 fun InfoTextRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(label, color = Color.Gray, fontSize = 16.sp)
         Text(value, color = Color.Black, fontSize = 16.sp)
     }
@@ -153,10 +159,7 @@ fun InfoTextRow(label: String, value: String) {
 
 @Composable
 fun PaymentRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(label, color = AppGreen, fontSize = 15.sp)
         Text(value, color = Color.Gray, fontSize = 15.sp)
     }
@@ -171,8 +174,6 @@ fun BookingStepperPayment() {
         Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
         Text("Thông tin", fontSize = 12.sp, fontWeight = FontWeight.Bold)
         Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-
-        // Bước hiện tại: THANH TOÁN
         Surface(color = AppGreen, shape = RoundedCornerShape(20.dp), modifier = Modifier.height(28.dp)) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp)) {
                 Text("THANH TOÁN", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
