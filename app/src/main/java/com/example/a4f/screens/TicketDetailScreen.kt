@@ -84,9 +84,9 @@ fun TicketDetailScreen(
                 }
             }
 
-            if (qrBitmap != null) {
+            qrBitmap?.let {
                 Image(
-                    bitmap = qrBitmap,
+                    bitmap = it,
                     contentDescription = "QR Code",
                     modifier = Modifier
                         .size(250.dp)
@@ -112,56 +112,52 @@ fun TicketDetailScreen(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
                     .shadow(14.dp, RoundedCornerShape(20.dp)),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE0F7F5))
+                colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
-                Column(
+                Box(
                     modifier = Modifier
                         .background(
                             Brush.verticalGradient(
-                                listOf(Color(0xFFD6F1EE), Color(0xFFCFE8E2))
+                                listOf(Color(0xFFE8F4F2), Color(0xFFD6ECE9))
                             )
                         )
                         .padding(20.dp)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                        .fillMaxWidth()
                 ) {
-                    // --- Status vé giống TicketCard ---
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(14.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    when (ticket.status.lowercase()) {
-                                        "confirmed" -> Color(0xFF2E7D32)
-                                        "pending" -> Color(0xFFF9A825)
-                                        "cancelled" -> Color(0xFFD32F2F)
-                                        else -> Color.Gray
-                                    }
-                                )
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            ticket.status.uppercase(),
-                            color = Color(0xFF0A3D3A),
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        // Status giống TicketCard
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        when (ticket.status.lowercase()) {
+                                            "upcoming" -> Color(0xFF2E7D32)
+                                            "today" -> Color(0xFF1976D2)
+                                            "completed" -> Color.Gray
+                                            "cancelled" -> Color(0xFFD32F2F)
+                                            else -> Color.Gray
+                                        }
+                                    )
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                ticket.status.uppercase(),
+                                color = Color(0xFF0A3D3A),
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
 
-                    Divider(color = Color(0xFF49736E).copy(alpha = 0.3f), thickness = 1.dp)
+                        Divider(color = Color(0xFF49736E).copy(alpha = 0.4f), thickness = 1.dp)
 
-                    val infoTextColor = Color(0xFF0A3D3A)
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TicketInfoRow("Ngày", ticket.bookedAt?.toDate()?.let { dateFormat.format(it) } ?: "-", infoTextColor)
-                        TicketInfoRow("Tuyến", "${ticket.source} → ${ticket.destination}", infoTextColor)
-                        TicketInfoRow("Ghế", ticket.seatNumber.joinToString(", "), infoTextColor)
-                        TicketInfoRow("Tổng tiền", "${ticket.totalPrice} VND", infoTextColor, bold = true)
+                        val textColor = Color(0xFF1B4F4A)
+                        TicketInfoRow("Ngày", ticket.bookedAt?.toDate()?.let { dateFormat.format(it) } ?: "-", textColor)
+                        TicketInfoRow("Tuyến", "${ticket.source} → ${ticket.destination}", textColor)
+                        TicketInfoRow("Ghế", ticket.seatNumber.joinToString(", "), textColor)
+                        TicketInfoRow("Tổng tiền", "${ticket.totalPrice} VND", textColor, bold = true)
 
-                        // Trạng thái thanh toán
                         val paymentText = if (isPaid) "Đã thanh toán" else "Chưa thanh toán"
                         val paymentColor = if (isPaid) Color(0xFF2E7D32) else Color(0xFFF9A825)
                         TicketInfoRow("Trạng thái thanh toán", paymentText, paymentColor, bold = true)
@@ -180,9 +176,7 @@ fun TicketInfoRow(
     bold: Boolean = false
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 0.dp, vertical = 4.dp), // bỏ background, giảm padding
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(title, color = Color.Black, fontWeight = FontWeight.Medium, fontSize = 15.sp)

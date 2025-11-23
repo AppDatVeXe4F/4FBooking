@@ -107,7 +107,9 @@ fun SelectSeatScreen(
                 val dateStr = date?.replace("/", "-") ?: "28-09-2025"
 
                 // 3. Chuyển màn hình kèm theo dữ liệu + THÊM TRIP ID VÀO CUỐI
-                navController.navigate("fill_info_screen/$seatsString/$totalPrice/$src/$dest/$dateStr/$startTime/$tripId")
+                navController.navigate(
+                    "fill_info_screen/${selectedSeats.joinToString(",")}/$totalPrice/$source/$destination/$date/$startTime/$tripId"
+                )
             }
         )
     }

@@ -33,19 +33,8 @@ fun MyTicketsScreen(
     viewModel: TicketListViewModel = viewModel()
 ) {
     val tickets by viewModel.tickets.collectAsState()
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableStateOf(viewModel.selectedTabIndex) }
     val tabTitles = listOf("Sắp tới", "Đã tới", "Hoàn thành")
-
-    // Bỏ giờ phút giây để filter vé chính xác
-    fun truncateTime(date: Date): Date {
-        val cal = Calendar.getInstance()
-        cal.time = date
-        cal.set(Calendar.HOUR_OF_DAY, 0)
-        cal.set(Calendar.MINUTE, 0)
-        cal.set(Calendar.SECOND, 0)
-        cal.set(Calendar.MILLISECOND, 0)
-        return cal.time
-    }
 
     val today = truncateTime(Date())
 
@@ -53,9 +42,9 @@ fun MyTicketsScreen(
         ticket.bookedAt?.toDate()?.let { date ->
             val ticketDate = truncateTime(date)
             when (selectedTab) {
-                0 -> ticketDate.after(today)
-                1 -> ticketDate == today
-                2 -> ticketDate.before(today)
+                0 -> ticketDate.after(today)       // Sắp tới
+                1 -> ticketDate == today           // Hôm nay
+                2 -> ticketDate.before(today)      // Hoàn thành
                 else -> true
             }
         } ?: false
@@ -66,37 +55,23 @@ fun MyTicketsScreen(
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF49736E)),
                 title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "VÉ CỦA TÔI",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            color = Color.White
-                        )
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text("VÉ CỦA TÔI", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color.White)
                     }
                 }
             )
         },
         containerColor = Color(0xFFEEF5F4)
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-        ) {
-            // Tab trạng thái
-            TabRow(
-                selectedTabIndex = selectedTab,
-                containerColor = Color.White,
-                contentColor = Color(0xFF006A60),
-            ) {
+        Column(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+            TabRow(selectedTabIndex = selectedTab, containerColor = Color.White, contentColor = Color(0xFF006A60)) {
                 tabTitles.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTab == index,
-                        onClick = { selectedTab = index },
+                        onClick = {
+                            selectedTab = index
+                            viewModel.selectedTabIndex = index
+                        },
                         selectedContentColor = Color(0xFF006A60),
                         unselectedContentColor = Color.Gray,
                         text = { Text(title, fontSize = 16.sp, fontWeight = FontWeight.Medium) }
@@ -106,24 +81,17 @@ fun MyTicketsScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // List vé
             if (filteredTickets.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Không có vé nào.", color = Color.Gray, fontSize = 16.sp)
                 }
             } else {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(filteredTickets) { ticket ->
                         TicketCard(ticket) {
-                            // click vé vẫn điều hướng
                             navController.navigate("ticket_detail/${ticket.id}")
                         }
                     }
@@ -133,14 +101,22 @@ fun MyTicketsScreen(
     }
 }
 
+fun truncateTime(date: Date): Date {
+    val cal = Calendar.getInstance()
+    cal.time = date
+    cal.set(Calendar.HOUR_OF_DAY, 0)
+    cal.set(Calendar.MINUTE, 0)
+    cal.set(Calendar.SECOND, 0)
+    cal.set(Calendar.MILLISECOND, 0)
+    return cal.time
+}
+
 @Composable
 fun TicketCard(ticket: Ticket, onClick: () -> Unit) {
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
             .shadow(12.dp, RoundedCornerShape(18.dp))
             .clip(RoundedCornerShape(18.dp))
             .clickable { onClick() },
@@ -148,70 +124,34 @@ fun TicketCard(ticket: Ticket, onClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Box(
-            modifier = Modifier
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFE8F4F2),
-                            Color(0xFFD6ECE9)
-                        )
-                    )
-                )
+            modifier = Modifier.background(Brush.verticalGradient(listOf(Color(0xFFE8F4F2), Color(0xFFD6ECE9))))
                 .padding(18.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-
-                // --- STATUS ---
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
-                        modifier = Modifier
-                            .size(14.dp)
-                            .clip(CircleShape)
+                        modifier = Modifier.size(14.dp).clip(CircleShape)
                             .background(
                                 when (ticket.status.lowercase()) {
-                                    "confirmed" -> Color(0xFF2E7D32)
-                                    "pending" -> Color(0xFFF9A825)
+                                    "upcoming" -> Color(0xFF2E7D32)
+                                    "today" -> Color(0xFF1976D2)
+                                    "completed" -> Color.Gray
                                     "cancelled" -> Color(0xFFD32F2F)
                                     else -> Color.Gray
                                 }
                             )
                     )
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        ticket.status.uppercase(),
-                        color = Color(0xFF0A3D3A),
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(ticket.status.uppercase(), color = Color(0xFF0A3D3A), fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Divider(color = Color(0xFF49736E).copy(alpha = 0.4f), thickness = 1.dp)
 
-                // --- INFO TEXT ---
                 val textColor = Color(0xFF1B4F4A)
-
-                Text(
-                    "Ngày: ${ticket.bookedAt?.toDate()?.let { dateFormat.format(it) } ?: "-"}",
-                    color = textColor,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    "Tuyến: ${ticket.source} → ${ticket.destination}",
-                    color = textColor,
-                    fontSize = 15.sp
-                )
-                Text(
-                    "Ghế: ${ticket.seatNumber.joinToString(", ")}",
-                    color = textColor,
-                    fontSize = 15.sp
-                )
-                Text(
-                    "Tổng tiền: ${ticket.totalPrice} VND",
-                    color = textColor,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Text("Ngày: ${ticket.bookedAt?.toDate()?.let { dateFormat.format(it) } ?: "-"}", color = textColor, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+                Text("Tuyến: ${ticket.source} → ${ticket.destination}", color = textColor, fontSize = 15.sp)
+                Text("Ghế: ${ticket.seatNumber.joinToString(", ")}", color = textColor, fontSize = 15.sp)
+                Text("Tổng tiền: ${ticket.totalPrice} VND", color = textColor, fontSize = 15.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
