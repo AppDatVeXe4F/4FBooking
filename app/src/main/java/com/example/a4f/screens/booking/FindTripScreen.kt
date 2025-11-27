@@ -187,93 +187,94 @@ fun FindTripScreen(
 }
 
 // --- DỮ LIỆU (6 Chuyến/Ngày) ---
+// --- HÀM TẠO DỮ LIỆU GIẢ LẬP  ---
 fun generateMockTripsForDate(index: Int, source: String?, dest: String?): List<Trip> {
+    // 1. Lấy điểm đi/đến:
     val startPoint = source ?: "Bến xe Miền Tây"
     val endPoint = dest ?: "VP Long Xuyên"
-    val offset = index * 15
 
-    // TỔNG SỐ GHẾ CỦA XE
+    val offset = index * 15
     val totalSeats = 28
 
     return listOf(
         Trip(
-            id = "1",
+            id = "trip_001",
             startTime = "${6 + (index % 2)}:${15 + (index * 5) % 45}",
             startStation = startPoint,
             endTime = "${10 + (index % 2)}:${15 + (index * 5) % 45}",
             endStation = endPoint,
             distanceTime = "185km - 4h",
             price = "230.000đ",
-            seatsAvailable = totalSeats - getSoldSeatsCount("1"),
+            seatsAvailable = totalSeats - getSoldSeatsCount("trip_001"),
             seatType = "Limousine"
         ),
         Trip(
-            id = "2",
+            id = "trip_002",
             startTime = "${8 + (index % 2)}:00",
             startStation = startPoint,
             endTime = "${12 + (index % 2)}:00",
             endStation = endPoint,
             distanceTime = "185km - 4h",
             price = "230.000đ",
-            seatsAvailable = totalSeats - getSoldSeatsCount("2"),
+            seatsAvailable = totalSeats - getSoldSeatsCount("trip_002"),
             seatType = "Limousine"
         ),
         Trip(
-            id = "3",
+            id = "trip_003",
             startTime = "${10 + (index % 2)}:30",
             startStation = startPoint,
             endTime = "${14 + (index % 2)}:30",
             endStation = endPoint,
             distanceTime = "185km - 4h",
             price = "200.000đ",
-            seatsAvailable = totalSeats - getSoldSeatsCount("3"),
+            seatsAvailable = totalSeats - getSoldSeatsCount("trip_003"),
             seatType = "Giường nằm"
         ),
         Trip(
-            id = "4",
+            id = "trip_004",
             startTime = "13:${15 + offset % 45}",
             startStation = startPoint,
             endTime = "17:${15 + offset % 45}",
             endStation = endPoint,
             distanceTime = "185km - 4h",
-            price = "2000.000đ",
-            seatsAvailable = totalSeats - getSoldSeatsCount("4"),
+            price = "200.000đ", // Đã sửa lỗi 2 triệu -> 200k
+            seatsAvailable = totalSeats - getSoldSeatsCount("trip_004"),
             seatType = "Giường nằm"
         ),
         Trip(
-            id = "5",
+            id = "trip_005",
             startTime = "15:00",
             startStation = startPoint,
             endTime = "19:00",
             endStation = endPoint,
             distanceTime = "185km - 4h",
             price = "230.000đ",
-            seatsAvailable = totalSeats - getSoldSeatsCount("5"),
+            seatsAvailable = totalSeats - getSoldSeatsCount("trip_005"),
             seatType = "Limousine"
         ),
         Trip(
-            id = "6",
+            id = "trip_006",
             startTime = "22:00",
             startStation = startPoint,
             endTime = "02:00",
             endStation = endPoint,
             distanceTime = "185km - 4h",
             price = "200.000đ",
-            seatsAvailable = totalSeats - getSoldSeatsCount("6"),
+            seatsAvailable = totalSeats - getSoldSeatsCount("trip_006"),
             seatType = "Giường nằm"
         )
     )
 }
 
-// --- ĐẾM SỐ GHẾ ĐÃ BÁN  ---
+// --- HÀM ĐẾM SỐ GHẾ GIẢ LẬP  ---
 fun getSoldSeatsCount(tripId: String): Int {
     return when (tripId) {
-        "1" -> 4
-        "2" -> 6
-        "3" -> 5
-        "4" -> 4
-        "5" -> 0
-        "6" -> 8
+        "trip_001" -> 4
+        "trip_002" -> 6
+        "trip_003" -> 5
+        "trip_004" -> 4
+        "trip_005" -> 0
+        "trip_006" -> 8
         else -> 2
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.a4f.data.FirestoreRepository
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -38,8 +39,8 @@ data class Seat(val id: String, val floor: Int, val isSold: Boolean = false)
 @Composable
 fun SelectSeatScreen(
     navController: NavController,
-    tripId: String = "1", // NHẬN ID CHUYẾN XE
-    pricePerTicket: Int = 200000,
+    tripId: String = "trip_001",
+    pricePerTicket: Int = 0,
     source: String? = "TP. HỒ CHÍ MINH",
     destination: String? = "AN GIANG",
     date: String? = "Chủ nhật, 28-09-2025",
@@ -47,14 +48,37 @@ fun SelectSeatScreen(
 ) {
     val selectedSeats = remember { mutableStateListOf<String>() }
 
-    // --- TẠO DANH SÁCH GHẾ ĐÃ BÁN KHÁC NHAU DỰA VÀO TRIP ID ---
-    val soldSeatsList = remember(tripId) { getSoldSeatsByTripId(tripId) }
+    // State lưu dữ liệu Realtime
+    var soldSeatsList by remember { mutableStateOf<List<String>>(emptyList()) }
+    var realPrice by remember { mutableIntStateOf(pricePerTicket) }
 
-    // Tầng 1 và Tầng 2 dựa trên danh sách đã bán
-    val seatsFloor1 = remember(tripId) { generateSeats(1, soldSeatsList) }
-    val seatsFloor2 = remember(tripId) { generateSeats(2, soldSeatsList) }
+    // --- KẾT NỐI REAL-TIME  ---
+    DisposableEffect(tripId) {
+        // 1. Bật chế độ lắng nghe ghế
+        val listener = FirestoreRepository.listenToTripUpdates(tripId) { newBookedSeats, _ ->
+            // Khi Firebase đổi, biến này cập nhật -> Màn hình tự vẽ lại -> Ghế chuyển đỏ
+            soldSeatsList = newBookedSeats
+        }
 
-    val totalPrice = selectedSeats.size * pricePerTicket
+        // 2. Tắt lắng nghe khi thoát màn hình
+        onDispose {
+            listener.remove()
+        }
+    }
+
+    // Lấy giá vé
+    LaunchedEffect(tripId) {
+        val price = FirestoreRepository.getTripPrice(tripId)
+        if (price > 0) realPrice = price
+    }
+    // ------------------------------------------------
+
+    // Logic tính tiền
+    val totalPrice = selectedSeats.size * realPrice
+
+    // Tạo ghế dựa trên danh sách soldSeatsList
+    val seatsFloor1 = generateSeats(1, soldSeatsList)
+    val seatsFloor2 = generateSeats(2, soldSeatsList)
 
     Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
         // HEADER
@@ -96,7 +120,7 @@ fun SelectSeatScreen(
             selectedSeats = selectedSeats,
             totalPrice = totalPrice,
             onContinue = {
-                // --- CHUYỂN SANG MÀN 3  ---
+                // --- MÀN 3  ---
 
                 // 1. Chuỗi danh sách ghế
                 val seatsString = if (selectedSeats.isEmpty()) "Chưa chọn" else selectedSeats.joinToString(", ")
@@ -115,7 +139,7 @@ fun SelectSeatScreen(
     }
 }
 
-// --- HÀM QUAN TRỌNG: QUY ĐỊNH GHẾ ĐÃ BÁN CHO TỪNG CHUYẾN ---
+// --- QUY ĐỊNH GHẾ ĐÃ BÁN CHO TỪNG CHUYẾN ---
 fun getSoldSeatsByTripId(tripId: String): List<String> {
     return when (tripId) {
         "1" -> listOf("A01", "A02", "B05", "B06")
@@ -127,8 +151,6 @@ fun getSoldSeatsByTripId(tripId: String): List<String> {
         else -> listOf("A01", "B01")
     }
 }
-
-// --- CÁC COMPONENT CON  ---
 
 @Composable
 fun SeatGridSection(seats: List<Seat>, selectedSeats: MutableList<String>) {
