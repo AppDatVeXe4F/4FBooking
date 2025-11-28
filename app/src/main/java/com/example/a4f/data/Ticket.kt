@@ -12,5 +12,5 @@ data class Ticket(
     val user: String? = null,
     val source: String = "",
     val destination: String = "",
-    val isPaid: Boolean = false
+    val isPaid: Boolean = true
 )

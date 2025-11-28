@@ -50,8 +50,7 @@ fun TicketDetailScreen(
     }
 
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-    val isPaid = ticket.isPaid ?: false
-
+    val isPaid = true
     Scaffold(
         topBar = {
             TopAppBar(
@@ -136,7 +135,6 @@ fun TicketDetailScreen(
                                             "upcoming" -> Color(0xFF2E7D32)
                                             "today" -> Color(0xFF1976D2)
                                             "completed" -> Color.Gray
-                                            "cancelled" -> Color(0xFFD32F2F)
                                             else -> Color.Gray
                                         }
                                     )
@@ -154,7 +152,6 @@ fun TicketDetailScreen(
 
                         val textColor = Color(0xFF1B4F4A)
                         TicketInfoRow("Ngày", ticket.bookedAt?.toDate()?.let { dateFormat.format(it) } ?: "-", textColor)
-                        TicketInfoRow("Tuyến", "${ticket.source} → ${ticket.destination}", textColor)
                         TicketInfoRow("Ghế", ticket.seatNumber.joinToString(", "), textColor)
                         TicketInfoRow("Tổng tiền", "${ticket.totalPrice} VND", textColor, bold = true)
 

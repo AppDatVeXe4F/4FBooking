@@ -136,7 +136,6 @@ fun TicketCard(ticket: Ticket, onClick: () -> Unit) {
                                     "upcoming" -> Color(0xFF2E7D32)
                                     "today" -> Color(0xFF1976D2)
                                     "completed" -> Color.Gray
-                                    "cancelled" -> Color(0xFFD32F2F)
                                     else -> Color.Gray
                                 }
                             )
@@ -149,7 +148,6 @@ fun TicketCard(ticket: Ticket, onClick: () -> Unit) {
 
                 val textColor = Color(0xFF1B4F4A)
                 Text("Ngày: ${ticket.bookedAt?.toDate()?.let { dateFormat.format(it) } ?: "-"}", color = textColor, fontSize = 15.sp, fontWeight = FontWeight.Medium)
-                Text("Tuyến: ${ticket.source} → ${ticket.destination}", color = textColor, fontSize = 15.sp)
                 Text("Ghế: ${ticket.seatNumber.joinToString(", ")}", color = textColor, fontSize = 15.sp)
                 Text("Tổng tiền: ${ticket.totalPrice} VND", color = textColor, fontSize = 15.sp, fontWeight = FontWeight.Bold)
             }
