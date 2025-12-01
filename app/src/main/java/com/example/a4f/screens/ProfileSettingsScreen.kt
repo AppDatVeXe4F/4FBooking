@@ -63,6 +63,8 @@ fun ProfileSettingsScreen(
     var isLoading by remember { mutableStateOf(true) }
     var avatarUri by remember { mutableStateOf<Uri?>(null) }
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var isDeleting by remember { mutableStateOf(false) }
     
     // Date picker state
     val datePickerState = rememberDatePickerState(
@@ -155,8 +157,46 @@ fun ProfileSettingsScreen(
     
     // Hàm xóa tài khoản
     fun deleteAccount() {
-        // TODO: Implement delete account
-        Toast.makeText(context, context.getString(R.string.feature_under_development), Toast.LENGTH_SHORT).show()
+        showDeleteConfirmDialog = true
+    }
+    
+    // Hàm thực hiện xóa tài khoản
+    fun performDeleteAccount() {
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            Toast.makeText(context, context.getString(R.string.please_login), Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        isDeleting = true
+        coroutineScope.launch {
+            try {
+                val userId = currentUser.uid
+                
+                // 1. Xóa user document từ Firestore
+                db.collection("users").document(userId).delete().await()
+                
+                // 2. Xóa authentication account
+                currentUser.delete().await()
+                
+                // 3. Hiển thị thông báo thành công
+                Toast.makeText(context, context.getString(R.string.delete_account_success), Toast.LENGTH_SHORT).show()
+                
+                // 4. Navigate về login screen
+                val controller = mainNavController ?: navController
+                controller.navigate(AppRoutes.LOGIN) {
+                    popUpTo(0) { inclusive = true }
+                }
+                
+            } catch (e: Exception) {
+                isDeleting = false
+                Toast.makeText(
+                    context, 
+                    context.getString(R.string.delete_account_error, e.message ?: ""), 
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
     
     Scaffold(
@@ -234,6 +274,68 @@ fun ProfileSettingsScreen(
             ) {
                 DatePicker(state = datePickerState)
             }
+        }
+        
+        // Delete account confirmation dialog
+        if (showDeleteConfirmDialog) {
+            AlertDialog(
+                onDismissRequest = { 
+                    if (!isDeleting) {
+                        showDeleteConfirmDialog = false 
+                    }
+                },
+                title = {
+                    Text(
+                        stringResource(R.string.confirm_delete_account),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                },
+                text = {
+                    Text(
+                        stringResource(R.string.delete_account_warning),
+                        fontSize = 16.sp
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showDeleteConfirmDialog = false
+                            performDeleteAccount()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                        enabled = !isDeleting
+                    ) {
+                        if (isDeleting) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = Color.White
+                            )
+                        } else {
+                            Text(
+                                stringResource(R.string.delete_account),
+                                color = Color.White
+                            )
+                        }
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { 
+                            if (!isDeleting) {
+                                showDeleteConfirmDialog = false 
+                            }
+                        },
+                        enabled = !isDeleting
+                    ) {
+                        Text(
+                            stringResource(R.string.cancel),
+                            color = Color.Gray
+                        )
+                    }
+                },
+                containerColor = Color.White
+            )
         }
         
         if (isLoading) {

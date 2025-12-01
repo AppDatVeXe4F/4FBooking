@@ -21,6 +21,11 @@
     <string name="date_of_birth">Ngày sinh</string>
     <string name="save_info">Lưu thông tin</string>
     <string name="delete_account">Xóa tài khoản</string>
+    <string name="confirm_delete_account">Xác nhận xóa tài khoản</string>
+    <string name="delete_account_warning">Bạn có chắc chắn muốn xóa tài khoản không? Hành động này không thể hoàn tác. Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.</string>
+    <string name="delete_account_success">Tài khoản đã được xóa thành công</string>
+    <string name="delete_account_error">Lỗi khi xóa tài khoản: %1$s</string>
+    <string name="deleting_account">Đang xóa tài khoản…</string>
     <string name="tap_to_change_photo">Chạm để thay đổi ảnh</string>
     <string name="date_format_placeholder">dd/MM/yyyy</string>
     <string name="info_security_message">Thông tin của bạn được bảo mật và chỉ dùng để xác minh tài khoản.</string>

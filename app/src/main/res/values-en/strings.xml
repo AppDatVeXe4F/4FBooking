@@ -21,6 +21,11 @@
     <string name="date_of_birth">Date of Birth</string>
     <string name="save_info">Save Information</string>
     <string name="delete_account">Delete Account</string>
+    <string name="confirm_delete_account">Confirm Delete Account</string>
+    <string name="delete_account_warning">Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.</string>
+    <string name="delete_account_success">Account deleted successfully</string>
+    <string name="delete_account_error">Error deleting account: %1$s</string>
+    <string name="deleting_account">Deleting account…</string>
     <string name="tap_to_change_photo">Tap to change photo</string>
     <string name="date_format_placeholder">dd/MM/yyyy</string>
     <string name="info_security_message">Your information is secure and only used for account verification.</string>
