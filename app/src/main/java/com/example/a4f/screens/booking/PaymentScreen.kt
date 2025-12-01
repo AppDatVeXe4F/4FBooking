@@ -24,6 +24,8 @@ import androidx.navigation.NavController
 import com.example.a4f.R
 import com.example.a4f.data.FirestoreRepository
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -43,11 +45,13 @@ fun PaymentScreen(
     userEmail: String
 ) {
     val context = LocalContext.current // Để hiện thông báo lỗi nếu có
+    val coroutineScope = rememberCoroutineScope()
     val displayDate = date?.replace("-", "/") ?: ""
     val formattedPrice = NumberFormat.getNumberInstance(Locale("vi", "VN")).format(totalPrice)
 
     var timeLeft by remember { mutableIntStateOf(600) }
     var showCancelDialog by remember { mutableStateOf(false) }
+    var isProcessing by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         while (timeLeft > 0) {
@@ -118,33 +122,56 @@ fun PaymentScreen(
 
             Button(
                 onClick = {
+                    if (isProcessing) return@Button // Tránh click nhiều lần
+                    
                     // --- BỌC AN TOÀN CHỐNG SẬP APP ---
-                    try {
-                        // 1. Kiểm tra dữ liệu đầu vào
-                        if (tripId.isBlank()) {
-                            Toast.makeText(context, context.getString(R.string.error_trip_not_found), Toast.LENGTH_SHORT).show()
-                            return@Button // Dừng lại, không chạy tiếp
+                    coroutineScope.launch {
+                        try {
+                            isProcessing = true
+                            
+                            // 1. Kiểm tra dữ liệu đầu vào
+                            if (tripId.isBlank()) {
+                                Toast.makeText(context, context.getString(R.string.error_trip_not_found), Toast.LENGTH_SHORT).show()
+                                isProcessing = false
+                                return@launch
+                            }
+
+                            // 2. Gọi hàm lưu Firebase và await để đảm bảo hoàn thành
+                            val seatsList = selectedSeats.split(",").map { it.trim() }
+                            FirestoreRepository.bookSeats(
+                                tripId = tripId, 
+                                newSeats = seatsList, 
+                                totalPrice = totalPrice,
+                                source = source,
+                                destination = destination
+                            )
+
+                            // 3. Chuyển màn hình sau khi lưu thành công
+                            navController.navigate("qr_code_screen/$totalPrice/$tripId")
+
+                        } catch (e: NotImplementedError) {
+                            Toast.makeText(context, context.getString(R.string.error_todo), Toast.LENGTH_LONG).show()
+                            isProcessing = false
+                        } catch (e: Exception) {
+                            Toast.makeText(context, context.getString(R.string.error_system, e.message ?: ""), Toast.LENGTH_LONG).show()
+                            e.printStackTrace()
+                            isProcessing = false
                         }
-
-                        // 2. Gọi hàm lưu Firebase
-                        val seatsList = selectedSeats.split(",").map { it.trim() }
-                        FirestoreRepository.bookSeats(tripId, seatsList, totalPrice)
-
-                        // 3. Chuyển màn hình
-                        navController.navigate("qr_code_screen/$totalPrice/$tripId")
-
-                    } catch (e: NotImplementedError) {
-                        Toast.makeText(context, context.getString(R.string.error_todo), Toast.LENGTH_LONG).show()
-                    } catch (e: Exception) {
-                        Toast.makeText(context, context.getString(R.string.error_system, e.message ?: ""), Toast.LENGTH_LONG).show()
-                        e.printStackTrace()
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = AppGreen),
                 modifier = Modifier.fillMaxWidth().height(50.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                enabled = !isProcessing
             ) {
-                Text(stringResource(R.string.payment_step), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                if (isProcessing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White
+                    )
+                } else {
+                    Text(stringResource(R.string.payment_step), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

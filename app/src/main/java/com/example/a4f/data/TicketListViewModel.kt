@@ -25,6 +25,10 @@ class TicketListViewModel : ViewModel() {
         _selectedTab.value = index
     }
 
+    // Hàm refresh để force reload dữ liệu
+    fun refreshTickets() {
+        fetchTickets()
+    }
 
     init {
         fetchTickets()

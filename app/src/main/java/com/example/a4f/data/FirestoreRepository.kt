@@ -56,11 +56,20 @@ object FirestoreRepository {
         } catch (e: Exception) { 0 }
     }
 
-    // Hàm đặt vé (Giữ nguyên)
-    fun bookSeats(tripId: String, newSeats: List<String>, totalPrice: Int) {
+    // Hàm đặt vé - Chuyển thành suspend function để await
+    suspend fun bookSeats(
+        tripId: String, 
+        newSeats: List<String>, 
+        totalPrice: Int,
+        source: String? = null,
+        destination: String? = null
+    ) {
+        // 1. Cập nhật ghế đã đặt trong trip
         db.collection("trips").document(tripId)
             .update("bookedSeats", FieldValue.arrayUnion(*newSeats.toTypedArray()))
+            .await()
 
+        // 2. Tạo booking document với đầy đủ thông tin
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
         val bookingData = hashMapOf(
             "bookedAt" to FieldValue.serverTimestamp(),
@@ -70,6 +79,16 @@ object FirestoreRepository {
             "tripId" to tripId,
             "userId" to userId
         )
-        db.collection("bookings").add(bookingData)
+        
+        // Thêm source và destination nếu có
+        if (source != null) {
+            bookingData["source"] = source
+        }
+        if (destination != null) {
+            bookingData["destination"] = destination
+        }
+        
+        // 3. Lưu booking và await để đảm bảo hoàn thành trước khi tiếp tục
+        db.collection("bookings").add(bookingData).await()
     }
 }

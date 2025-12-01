@@ -37,6 +37,11 @@ fun MyTicketsScreen(
     val tickets by viewModel.tickets.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsState()
 
+    // Refresh tickets khi màn hình được hiển thị lại
+    LaunchedEffect(Unit) {
+        viewModel.refreshTickets()
+    }
+
     val tabTitles = listOf(
         stringResource(R.string.upcoming),
         stringResource(R.string.today),

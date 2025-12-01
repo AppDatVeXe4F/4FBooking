@@ -99,7 +99,8 @@ fun ProfileSettingsScreen(
                 val document = db.collection("users").document(currentUser.uid).get().await()
                 if (document != null && document.exists()) {
                     fullName = document.getString("fullName") ?: ""
-                    phone = document.getString("phone") ?: ""
+                    // Check cả phoneNumber và phone để tương thích với dữ liệu cũ
+                    phone = document.getString("phoneNumber") ?: document.getString("phone") ?: ""
                     email = document.getString("email") ?: currentUser.email ?: ""
                     
                     // Lấy dateOfBirth nếu có (lưu dưới dạng string)
@@ -131,7 +132,8 @@ fun ProfileSettingsScreen(
             try {
                 val userData = hashMapOf(
                     "fullName" to fullName.trim(),
-                    "phone" to phone.trim(),
+                    "phoneNumber" to phone.trim(), // Lưu dưới tên phoneNumber để nhất quán với FillInfoScreen
+                    "phone" to phone.trim(), // Cũng lưu dưới tên phone để tương thích với dữ liệu cũ
                     "email" to email.trim()
                 )
                 
