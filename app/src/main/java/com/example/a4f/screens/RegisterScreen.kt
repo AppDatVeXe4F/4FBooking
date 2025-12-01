@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.example.a4f.R
 import com.example.a4f.navigation.AppRoutes
@@ -130,13 +131,13 @@ fun RegisterScreen(navController: NavController) {
 
 
                 // Email
-                Text("Email", fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
+                Text(stringResource(R.string.email), fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it; emailError = null },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("yourname@gmail.com") },
+                    placeholder = { Text(stringResource(R.string.email_placeholder)) },
                     leadingIcon = { Icon(Icons.Default.Email, null) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -156,13 +157,13 @@ fun RegisterScreen(navController: NavController) {
 
 
                 // Họ và tên
-                Text("Họ và tên", fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
+                Text(stringResource(R.string.full_name), fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = fullName,
                     onValueChange = { fullName = it; fullNameError = null },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Nguyễn Văn A") },
+                    placeholder = { Text(stringResource(R.string.full_name_placeholder)) },
                     leadingIcon = { Icon(Icons.Default.Person, null) },
                     singleLine = true,
                     shape = RoundedCornerShape(16.dp),
@@ -181,13 +182,13 @@ fun RegisterScreen(navController: NavController) {
 
 
                 // Mật khẩu
-                Text("Mật khẩu", fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
+                Text(stringResource(R.string.password), fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it; passwordError = null },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("••••••••") },
+                    placeholder = { Text(stringResource(R.string.password_placeholder)) },
                     leadingIcon = { Icon(Icons.Default.Lock, null) },
                     singleLine = true,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -196,7 +197,7 @@ fun RegisterScreen(navController: NavController) {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
                                 imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                contentDescription = "Hiện/Ẩn mật khẩu"
+                                contentDescription = stringResource(R.string.show_hide_password)
                             )
                         }
                     },
@@ -212,7 +213,7 @@ fun RegisterScreen(navController: NavController) {
                         if (passwordError != null) {
                             Text(passwordError!!, color = MaterialTheme.colorScheme.error)
                         } else {
-                            Text("Tối thiểu 8 ký tự, có số và ký tự đặc biệt", color = Color.Gray, fontSize = 12.sp)
+                            Text(stringResource(R.string.password_requirements), color = Color.Gray, fontSize = 12.sp)
                         }
                     }
                 )
@@ -230,17 +231,17 @@ fun RegisterScreen(navController: NavController) {
                         var isValid = true
 
                         if (email.trim().isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
-                            emailError = "Vui lòng nhập email hợp lệ"
+                            emailError = context.getString(R.string.please_enter_valid_email)
                             isValid = false
                         }
 
                         if (fullName.trim().isBlank()) {
-                            fullNameError = "Vui lòng nhập họ và tên"
+                            fullNameError = context.getString(R.string.please_enter_full_name_register)
                             isValid = false
                         }
 
                         if (!isPasswordValid(password)) {
-                            passwordError = "Mật khẩu phải ≥ 8 ký tự, có chữ số và ký tự đặc biệt"
+                            passwordError = context.getString(R.string.password_validation_error)
                             isValid = false
                         }
 
@@ -249,7 +250,7 @@ fun RegisterScreen(navController: NavController) {
                             coroutineScope.launch {
                                 try {
                                     val authResult = auth.createUserWithEmailAndPassword(email.trim(), password).await()
-                                    val firebaseUser = authResult.user ?: throw Exception("Không thể lấy thông tin người dùng")
+                                    val firebaseUser = authResult.user ?: throw Exception(context.getString(R.string.cannot_get_user_info))
                                     val userData = hashMapOf(
                                         "fullName" to fullName.trim(),
                                         "email" to email.trim().lowercase(),
@@ -264,23 +265,23 @@ fun RegisterScreen(navController: NavController) {
                                         .set(userData, SetOptions.merge())
                                         .await()
 
-                                    Toast.makeText(context, "Đăng ký thành công! Chào mừng $fullName", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, context.getString(R.string.register_success, fullName), Toast.LENGTH_LONG).show()
                                     navigateToHome()
 
 
                                 } catch (e: Exception) {
                                     when (e) {
                                         is com.google.firebase.auth.FirebaseAuthUserCollisionException -> {
-                                            emailError = "Email này đã được sử dụng. Vui lòng dùng email khác hoặc đăng nhập."
+                                            emailError = context.getString(R.string.email_already_used)
                                         }
                                         is com.google.firebase.auth.FirebaseAuthWeakPasswordException -> {
-                                            passwordError = "Mật khẩu quá yếu. Vui lòng thử lại."
+                                            passwordError = context.getString(R.string.password_too_weak)
                                         }
                                         is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException -> {
-                                            emailError = "Email không hợp lệ. Vui lòng kiểm tra lại."
+                                            emailError = context.getString(R.string.invalid_email_format)
                                         }
                                         else -> {
-                                            Toast.makeText(context, "Đăng ký thất bại: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                                            Toast.makeText(context, context.getString(R.string.register_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
                                         }
                                     }
                                 } finally {
@@ -303,9 +304,9 @@ fun RegisterScreen(navController: NavController) {
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text("Đang tạo tài khoản...", fontSize = 18.sp, color = Color.White)
+                        Text(stringResource(R.string.creating_account), fontSize = 18.sp, color = Color.White)
                     } else {
-                        Text("Đăng ký", fontSize = 18.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.register), fontSize = 18.sp, color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -313,7 +314,7 @@ fun RegisterScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(32.dp))
 
 
-                Text("Hoặc", color = Color.Gray, fontSize = 14.sp)
+                Text(stringResource(R.string.or), color = Color.Gray, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(16.dp))
 
 
@@ -325,7 +326,7 @@ fun RegisterScreen(navController: NavController) {
                                 .addOnCompleteListener { task ->
                                     isLoading = false
                                     if (task.isSuccessful) {
-                                        Toast.makeText(context, "Đăng nhập với tư cách khách", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.login_as_guest), Toast.LENGTH_SHORT).show()
                                         navigateToHome()
                                     } else {
                                         Toast.makeText(context, "Lỗi: ${task.exception?.message}", Toast.LENGTH_SHORT).show()

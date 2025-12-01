@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.util.lerp
 import androidx.navigation.NavController
 import com.example.a4f.R
@@ -96,9 +97,9 @@ fun HomeScreen(navController: NavController) {
                         datePickerState.selectedDateMillis?.let { millis ->
                             ngayDi = convertMillisToDateString(millis)
                         }
-                    }) { Text("OK") }
+                    }) { Text(stringResource(R.string.ok)) }
                 },
-                dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Hủy") } }
+                dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.cancel)) } }
             ) {
                 DatePicker(state = datePickerState)
             }
@@ -124,7 +125,7 @@ fun HomeScreen(navController: NavController) {
                     onSearchComplete = { }
                 )
             }
-            item { SectionHeader(title = "DEAL HỜI GIÁ TỐT") }
+            item { SectionHeader(title = stringResource(R.string.good_deals)) }
             items(dummyDeals) { deal -> HomeDealItem(deal = deal, onClick = {}) }
             item { NewsTitle() }
             items(dummyNews) { news -> NewsItemCard(news = news, onClick = {}) }
@@ -138,7 +139,7 @@ fun HomeScreen(navController: NavController) {
 @Composable
 fun HomeTopAppBar() {
     CenterAlignedTopAppBar(
-        title = { Text("4F", color = HomeSearchTitleColor, fontWeight = FontWeight.Bold, fontSize = 24.sp) },
+        title = { Text(stringResource(R.string.app_title), color = HomeSearchTitleColor, fontWeight = FontWeight.Bold, fontSize = 24.sp) },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = HomeTopBarBackground)
     )
 }
@@ -186,7 +187,7 @@ fun SearchSection(
     var expandedDen by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("CHÚNG TÔI CÓ THỂ ĐƯA BẠN ĐẾN ĐÂU ?", color = HomeSearchTitleColor, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(stringResource(R.string.where_can_we_take_you), color = HomeSearchTitleColor, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         Spacer(Modifier.height(16.dp))
 
         Column(
@@ -197,7 +198,7 @@ fun SearchSection(
             ExposedDropdownMenuBox(expanded = expandedDi, onExpandedChange = { expandedDi = it }) {
                 OutlinedTextField(
                     value = diemDi, onValueChange = {}, readOnly = true, modifier = Modifier.fillMaxWidth().menuAnchor(),
-                    placeholder = { Text("Điểm đi") },
+                    placeholder = { Text(stringResource(R.string.departure_point)) },
                     leadingIcon = { Icon(Icons.Default.DirectionsBus, null, tint = Color.Gray) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDi) },
                     colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(
@@ -219,7 +220,7 @@ fun SearchSection(
             ExposedDropdownMenuBox(expanded = expandedDen, onExpandedChange = { expandedDen = it }) {
                 OutlinedTextField(
                     value = diemDen, onValueChange = {}, readOnly = true, modifier = Modifier.fillMaxWidth().menuAnchor(),
-                    placeholder = { Text("Điểm đến") },
+                    placeholder = { Text(stringResource(R.string.arrival_point)) },
                     leadingIcon = { Icon(Icons.Default.LocationOn, null, tint = Color.Gray) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDen) },
                     colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(
@@ -269,7 +270,7 @@ fun SearchSection(
             ),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Text("Đi thôi!!!!", fontSize = 18.sp, color = if (isFormValid) Color.White else Color.Gray, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.lets_go), fontSize = 18.sp, color = if (isFormValid) Color.White else Color.Gray, fontWeight = FontWeight.Bold)
         }
     }
 }

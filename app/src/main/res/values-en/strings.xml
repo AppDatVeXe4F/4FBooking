@@ -1,0 +1,192 @@
+<resources>
+    <string name="app_name">4F</string>
+    <string name="default_web_client_id">516167605895-c7npk5959fj5hn3h1v47kt179sd482lp.apps.googleusercontent.com</string>
+    
+    <!-- Profile Screen -->
+    <string name="notifications">Notifications</string>
+    <string name="profile_and_settings">Profile and Settings</string>
+    <string name="support_center">Support Center</string>
+    <string name="logout">Logout</string>
+    <string name="vietnamese">Vietnamese</string>
+    <string name="english">English</string>
+    <string name="new_member">New Member</string>
+    <string name="loading">Loading…</string>
+    <string name="guest">Guest</string>
+    
+    <!-- Profile Settings Screen -->
+    <string name="profile_and_settings_title">Profile and Settings</string>
+    <string name="full_name">Full Name *</string>
+    <string name="phone_number">Phone Number *</string>
+    <string name="email">Email *</string>
+    <string name="date_of_birth">Date of Birth</string>
+    <string name="save_info">Save Information</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="tap_to_change_photo">Tap to change photo</string>
+    <string name="date_format_placeholder">dd/MM/yyyy</string>
+    <string name="info_security_message">Your information is secure and only used for account verification.</string>
+    <string name="order_info_message">Order information will be sent to the phone number and email you provide.</string>
+    <string name="please_login">Please login</string>
+    <string name="please_enter_full_name">Please enter full name</string>
+    <string name="info_saved">Information saved</string>
+    <string name="error">Error: %1$s</string>
+    <string name="feature_under_development">Feature under development</string>
+    <string name="saving">Saving…</string>
+    
+    <!-- Support Center Screen -->
+    <string name="support_center_title">Support Center</string>
+    <string name="instructions">Instructions</string>
+    <string name="payment_instructions">Payment Instructions</string>
+    <string name="regulations">Regulations</string>
+    <string name="faq">Frequently Asked Questions</string>
+    <string name="bus_contact_info">Bus Contact Information</string>
+    <string name="hotline">Hotline</string>
+    <string name="contact_via_email">Contact via email</string>
+    <string name="contact_via_social">Contact via social media</string>
+    
+    <!-- Notifications Screen -->
+    <string name="notifications_title">Notifications</string>
+    
+    <!-- My Tickets Screen -->
+    <string name="my_tickets">MY TICKETS</string>
+    <string name="upcoming">Coming</string>
+    <string name="today">Today</string>
+    <string name="completed">Past</string>
+    <string name="cancelled">Canceled</string>
+    
+    <!-- Home Screen -->
+    <string name="home">Home</string>
+    <string name="booking">Booking</string>
+    <string name="my_tickets_tab">My Tickets</string>
+    <string name="profile">Profile</string>
+    
+    <!-- My Tickets Screen -->
+    <string name="no_tickets">No tickets found.</string>
+    <string name="date">Date: %1$s</string>
+    <string name="seats">Seats: %1$s</string>
+    <string name="total_price">Total: %1$s VND</string>
+    
+    <!-- Ticket Detail Screen -->
+    <string name="ticket_not_found">Ticket not found</string>
+    <string name="ticket_detail">Ticket Detail</string>
+    <string name="cancel_ticket">CANCEL TICKET</string>
+    <string name="cancel_ticket_button">Cancel Ticket</string>
+    <string name="confirm_cancel_title">Confirm</string>
+    <string name="confirm_cancel_message">Are you sure you want to cancel this ticket?</string>
+    <string name="cancel_warning">Cancelled tickets cannot be refunded.</string>
+    <string name="show_qr_to_staff">SHOW THIS CODE TO STAFF BEFORE BOARDING</string>
+    <string name="payment_status_paid">Paid</string>
+    <string name="refund_info">Your money will be refunded within 12 hours with a 10% fee.</string>
+    <string name="refund_amount">Amount you will receive: %1$s VND</string>
+    <string name="date_label">Date</string>
+    <string name="seats_label">Seats</string>
+    <string name="total_price_label">Total</string>
+    <string name="payment_status">Payment Status</string>
+    <string name="qr_code">QR Code</string>
+    
+    <!-- Profile Settings Screen -->
+    <string name="country_code">(+84)</string>
+    
+    <!-- Notifications Screen -->
+    <string name="notification_app_discount">APP 4F BOOK FAST – DISCOUNT NOW!</string>
+    <string name="notification_online_promotion">ONLINE PROMOTION</string>
+    <string name="notification_new_member_offer">SPECIAL OFFER FOR NEW MEMBERS</string>
+    <string name="notification_maintenance">SYSTEM MAINTENANCE ANNOUNCEMENT</string>
+    
+    <!-- Select Seat Screen -->
+    <string name="no_seat_selected">No seat selected</string>
+    <string name="tickets_count">%1$d tickets</string>
+    <string name="continue_button">Continue</string>
+    <string name="select_seat">SELECT SEAT</string>
+    <string name="time">Time</string>
+    <string name="information">Information</string>
+    <string name="payment">Payment</string>
+    
+    <!-- Login Screen -->
+    <string name="welcome">Welcome!</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="login">Login</string>
+    <string name="logging_in">Logging in…</string>
+    <string name="welcome_back">Welcome back!</string>
+    <string name="please_enter_email_password">Please enter email and password</string>
+    <string name="email_not_registered">This email is not registered.\nPlease tap \"Register now\" to create a new account.</string>
+    <string name="wrong_password">Incorrect password. Please try again.</string>
+    <string name="connection_error">Connection error. Please check your network and try again.</string>
+    <string name="login_as_guest">Login as guest</string>
+    <string name="connection_error_retry">Connection error, please try again</string>
+    <string name="no_account">Don\'t have an account? </string>
+    <string name="register_now">Register now</string>
+    <string name="or">Or</string>
+    <string name="email_placeholder">yourname@gmail.com</string>
+    <string name="password_placeholder">••••••••</string>
+    
+    <!-- Ticket Detail Screen -->
+    <string name="confirm_cancel_message_detail">Are you sure you want to cancel this ticket?</string>
+    <string name="cancel_warning_detail">Cancelled tickets cannot be refunded.</string>
+    
+    <!-- Register Screen -->
+    <string name="register">Register</string>
+    <string name="creating_account">Creating account…</string>
+    <string name="register_success">Registration successful! Welcome %1$s</string>
+    <string name="register_failed">Registration failed: %1$s</string>
+    <string name="full_name_placeholder">John Doe</string>
+    <string name="password_requirements">Minimum 8 characters, with numbers and special characters</string>
+    <string name="please_enter_valid_email">Please enter a valid email</string>
+    <string name="please_enter_full_name_register">Please enter full name</string>
+    <string name="password_validation_error">Password must be ≥ 8 characters with numbers and special characters</string>
+    <string name="email_already_used">This email is already in use. Please use another email or login.</string>
+    <string name="password_too_weak">Password too weak. Please try again.</string>
+    <string name="invalid_email_format">Invalid email format. Please check again.</string>
+    <string name="cannot_get_user_info">Cannot get user information</string>
+    <string name="show_hide_password">Show/Hide password</string>
+    
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_title">Forgot Password</string>
+    <string name="forgot_password_description">Enter your email to receive a password reset link</string>
+    <string name="send_reset_link">Send Reset Link</string>
+    <string name="sending">Sending…</string>
+    <string name="reset_link_sent">Password reset link sent!\nPlease check your email.</string>
+    
+    <!-- Home Screen -->
+    <string name="app_title">4F</string>
+    <string name="where_can_we_take_you">WHERE CAN WE TAKE YOU?</string>
+    <string name="departure_point">Departure</string>
+    <string name="arrival_point">Arrival</string>
+    <string name="lets_go">Let\'s Go!!!!</string>
+    <string name="good_deals">GOOD DEALS</string>
+    <string name="forgot_password_question">Forgot password?</string>
+    <string name="forgot_password_description_long">Don\'t worry! Just enter the email you used to register, and we\'ll send you a password reset link right away.</string>
+    <string name="please_enter_email">Please enter email</string>
+    
+    <!-- Find Trip Screen -->
+    <string name="loading_trips">Loading…</string>
+    <string name="default_departure">WESTERN BUS STATION</string>
+    <string name="default_arrival">LONG XUYEN OFFICE</string>
+    <string name="no_trips_found">No trips found!</string>
+    <string name="time_step">TIME</string>
+    <string name="distance">Distance: %1$s</string>
+    <string name="seats_remaining">%1$s seats left</string>
+    <string name="price_filter">Price</string>
+    <string name="seat_type_filter">Seat Type</string>
+    <string name="time_filter">Time</string>
+    <string name="selected">Selected</string>
+    <string name="default_sort">Default</string>
+    <string name="all">All</string>
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
+    <string name="bed_seat">Bed Seat</string>
+    <string name="morning_shift">Morning (06:00 - 12:00)</string>
+    <string name="afternoon_shift">Afternoon (12:00 - 18:00)</string>
+    <string name="evening_shift">Evening (18:00 - 22:00)</string>
+    
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="back">Back</string>
+    <string name="save">Save</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="confirm">Confirm</string>
+    <string name="close">Close</string>
+</resources>
+

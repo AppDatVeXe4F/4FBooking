@@ -4,6 +4,7 @@ package com.example.a4f.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
@@ -19,16 +20,15 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.a4f.data.Ticket
+import com.example.a4f.R
 import com.example.a4f.data.TicketListViewModel
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import java.text.SimpleDateFormat
 import java.util.*
-import androidx.compose.foundation.shape.CircleShape
-
 
 @Composable
 fun TicketDetailScreen(
@@ -39,25 +39,27 @@ fun TicketDetailScreen(
     val tickets by viewModel.tickets.collectAsState()
     val ticket = tickets.find { it.id == ticketId }
 
+    var showCancelDialog by remember { mutableStateOf(false) }
+
     if (ticket == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("Không tìm thấy vé", color = Color.Gray, fontSize = 16.sp)
+            Text(stringResource(R.string.ticket_not_found), color = Color.Gray, fontSize = 16.sp)
         }
         return
     }
 
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-    val isPaid = true
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Chi tiết vé", fontSize = 20.sp, color = Color.White, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.ticket_detail), fontSize = 20.sp, color = Color.White, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF49736E))
@@ -86,7 +88,7 @@ fun TicketDetailScreen(
             qrBitmap?.let {
                 Image(
                     bitmap = it,
-                    contentDescription = "QR Code",
+                    contentDescription = stringResource(R.string.qr_code),
                     modifier = Modifier
                         .size(250.dp)
                         .shadow(12.dp, RoundedCornerShape(20.dp))
@@ -124,7 +126,7 @@ fun TicketDetailScreen(
                         .fillMaxWidth()
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        // Status giống TicketCard
+                        // Status
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
@@ -135,31 +137,97 @@ fun TicketDetailScreen(
                                             "upcoming" -> Color(0xFF2E7D32)
                                             "today" -> Color(0xFF1976D2)
                                             "completed" -> Color.Gray
+                                            "cancelled" -> Color(0xFFD32F2F)
                                             else -> Color.Gray
                                         }
                                     )
                             )
                             Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                ticket.status.uppercase(),
-                                color = Color(0xFF0A3D3A),
-                                fontSize = 17.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+            val statusText = when (ticket.status.lowercase()) {
+                "upcoming" -> stringResource(R.string.upcoming)
+                "today" -> stringResource(R.string.today)
+                "completed" -> stringResource(R.string.completed)
+                "cancelled" -> stringResource(R.string.cancelled)
+                else -> ticket.status
+            }
+            Text(
+                statusText.uppercase(),
+                color = Color(0xFF0A3D3A),
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold
+            )
                         }
 
                         Divider(color = Color(0xFF49736E).copy(alpha = 0.4f), thickness = 1.dp)
 
                         val textColor = Color(0xFF1B4F4A)
-                        TicketInfoRow("Ngày", ticket.bookedAt?.toDate()?.let { dateFormat.format(it) } ?: "-", textColor)
-                        TicketInfoRow("Ghế", ticket.seatNumber.joinToString(", "), textColor)
-                        TicketInfoRow("Tổng tiền", "${ticket.totalPrice} VND", textColor, bold = true)
+                        TicketInfoRow(stringResource(R.string.date_label), ticket.bookedAt?.toDate()?.let { dateFormat.format(it) } ?: "-", textColor)
+                        TicketInfoRow(stringResource(R.string.seats_label), ticket.seatNumber.joinToString(", "), textColor)
+                        TicketInfoRow(stringResource(R.string.total_price_label), "${ticket.totalPrice} VND", textColor, bold = true)
 
-                        val paymentText = if (isPaid) "Đã thanh toán" else "Chưa thanh toán"
-                        val paymentColor = if (isPaid) Color(0xFF2E7D32) else Color(0xFFF9A825)
-                        TicketInfoRow("Trạng thái thanh toán", paymentText, paymentColor, bold = true)
+
+                        TicketInfoRow(stringResource(R.string.payment_status), stringResource(R.string.payment_status_paid), Color(0xFF2E7D32), bold = true)
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Nút HỦY VÉ
+            if (ticket.status.lowercase() != "cancelled") {
+                Button(
+                    onClick = { showCancelDialog = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
+                    modifier = Modifier.fillMaxWidth().height(50.dp)
+                ) {
+                    Text(stringResource(R.string.cancel_ticket), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            // Dialog xác nhận hủy vé
+            if (showCancelDialog) {
+                val refundAmount = ticket.totalPrice * 0.9 // Hoàn 90% vì phí 10%
+                AlertDialog(
+                    onDismissRequest = { showCancelDialog = false },
+                    title = { Text("Xác nhận", fontWeight = FontWeight.Bold, fontSize = 18.sp) },
+                    text = {
+                        Column {
+                            Text(
+                                "Bạn có chắc chắn muốn hủy vé này không?",
+                                fontSize = 16.sp
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                "Tiền của quý khách sẽ được hoàn trong 12h và phí là 10%.",
+                                fontSize = 16.sp,
+                                color = Color.Red,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                "Số tiền quý khách nhận được: ${"%,.0f".format(refundAmount)} VND",
+                                fontSize = 18.sp,
+                                color = Color.Red,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.cancelTicket(ticket.id)
+                            viewModel.setSelectedTab(3)
+                            showCancelDialog = false
+                            navController.popBackStack()
+                        }) {
+                            Text("Hủy vé", color = Color.Red, fontWeight = FontWeight.Bold)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showCancelDialog = false }) {
+                            Text("Hủy", color = Color.Gray)
+                        }
+                    }
+                )
             }
         }
     }

@@ -18,28 +18,26 @@ class TicketListViewModel : ViewModel() {
 
     private val _tickets = MutableStateFlow<List<Ticket>>(emptyList())
     val tickets: StateFlow<List<Ticket>> = _tickets
-    var selectedTabIndex: Int = 0  // không dùng mutableStateOf
+    private val _selectedTab = MutableStateFlow(0)
+    val selectedTab: StateFlow<Int> = _selectedTab
+
+    fun setSelectedTab(index: Int) {
+        _selectedTab.value = index
+    }
+
 
     init {
         fetchTickets()
     }
 
     private fun fetchTickets() {
-        viewModelScope.launch {
-            try {
-                val userId = FirebaseAuth.getInstance().currentUser?.uid
-                if (userId == null) {
-                    Log.e("TicketViewModel", "User chưa đăng nhập")
-                    return@launch
-                }
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-                val snapshot = db.collection("bookings")
-                    .whereEqualTo("userId", userId)
-                    .orderBy("bookedAt", Query.Direction.DESCENDING)
-                    .get()
-                    .await()
-
-                Log.d("TicketViewModel", "Đã fetch ${snapshot.size()} vé cho userId=$userId")
+        db.collection("bookings")
+            .whereEqualTo("userId", userId)
+            .orderBy("bookedAt", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null || snapshot == null) return@addSnapshotListener
 
                 val today = truncateTime(Date())
 
@@ -53,7 +51,6 @@ class TicketListViewModel : ViewModel() {
                     val isPaid = doc.getBoolean("isPaid") ?: false
                     val tripId = doc.getString("tripId") ?: ""
 
-                    // Cập nhật status theo ngày
                     val status = when {
                         statusFromDb.lowercase() == "cancelled" -> "cancelled"
                         bookedAtDate == null -> statusFromDb
@@ -62,11 +59,9 @@ class TicketListViewModel : ViewModel() {
                         else -> "completed"
                     }
 
-                    Log.d("TicketViewModel", "Ticket ${doc.id}: status=$status, bookedAt=$bookedAtDate")
-
                     Ticket(
                         id = doc.id,
-                        bookedAt = bookedAtDate?.let { com.google.firebase.Timestamp(it) },
+                        bookedAt = doc.getTimestamp("bookedAt"),
                         seatNumber = seats,
                         status = status,
                         totalPrice = price,
@@ -79,11 +74,7 @@ class TicketListViewModel : ViewModel() {
                 }
 
                 _tickets.value = list
-
-            } catch (e: Exception) {
-                Log.e("TicketViewModel", "Lỗi khi fetch tickets: ${e.message}", e)
             }
-        }
     }
 
     private fun truncateTime(date: Date): Date {
@@ -113,4 +104,24 @@ class TicketListViewModel : ViewModel() {
             }
         }
     }
+    fun cancelTicket(ticketId: String) {
+        viewModelScope.launch {
+            try {
+                // Cập nhật status trên Firestore
+                db.collection("bookings").document(ticketId)
+                    .update("status", "cancelled")
+                    .await()
+
+                // Cập nhật local state
+                _tickets.value = _tickets.value.map { t ->
+                    if (t.id == ticketId) t.copy(status = "cancelled") else t
+                }
+
+                Log.d("TicketViewModel", "Ticket $ticketId đã được hủy.")
+            } catch (e: Exception) {
+                Log.e("TicketViewModel", "Lỗi khi hủy vé: ${e.message}", e)
+            }
+        }
+    }
+
 }

@@ -22,7 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.example.a4f.R
 import com.example.a4f.data.FirestoreRepository
 import java.text.NumberFormat
 import java.util.Locale
@@ -223,16 +225,16 @@ fun SeatSummaryFooter(selectedSeats: List<String>, totalPrice: Int, onContinue: 
     Card(shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)), elevation = CardDefaults.cardElevation(16.dp), modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = "${selectedSeats.size} vé", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(text = stringResource(R.string.tickets_count, selectedSeats.size), fontWeight = FontWeight.Bold, fontSize = 14.sp)
             }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = if (selectedSeats.isEmpty()) "Chưa chọn ghế" else selectedSeats.joinToString(", "), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.Black)
+                Text(text = if (selectedSeats.isEmpty()) stringResource(R.string.no_seat_selected) else selectedSeats.joinToString(", "), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.Black)
                 val formattedPrice = NumberFormat.getNumberInstance(Locale("vi", "VN")).format(totalPrice)
                 Text(text = "${formattedPrice}đ", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = Color.Black)
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onContinue, enabled = selectedSeats.isNotEmpty(), colors = ButtonDefaults.buttonColors(containerColor = AppGreen), modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(12.dp)) {
-                Text("Tiếp tục", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.continue_button), fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(Icons.Default.ArrowForward, contentDescription = null)
             }
@@ -244,17 +246,17 @@ fun SeatSummaryFooter(selectedSeats: List<String>, totalPrice: Int, onContinue: 
 fun BookingStepperForSeat() {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Thời gian", fontSize = 12.sp, color = Color.Gray)
+            Text(stringResource(R.string.time), fontSize = 12.sp, color = Color.Gray)
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
             Surface(color = AppGreen, shape = RoundedCornerShape(20.dp), modifier = Modifier.height(28.dp)) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp)) {
-                    Text("CHỌN GHẾ", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(stringResource(R.string.select_seat), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-            Text("Thông tin", fontSize = 12.sp, color = Color.Gray)
+            Text(stringResource(R.string.information), fontSize = 12.sp, color = Color.Gray)
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-            Text("Thanh toán", fontSize = 12.sp, color = Color.Gray)
+            Text(stringResource(R.string.payment), fontSize = 12.sp, color = Color.Gray)
         }
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {

@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.example.a4f.R
 import com.example.a4f.navigation.AppRoutes
@@ -90,7 +91,7 @@ fun LoginScreen(navController: NavController) {
 
 
             Text(
-                text = "Xin Chào, Quý Khách!",
+                text = stringResource(R.string.welcome),
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 color = LoginButtonColor,
@@ -99,13 +100,13 @@ fun LoginScreen(navController: NavController) {
 
 
             // Email
-            Text("Email", fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
+            Text(stringResource(R.string.email), fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("yourname@gmail.com") },
+                placeholder = { Text(stringResource(R.string.email_placeholder)) },
                 leadingIcon = { Icon(Icons.Default.Email, null) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -123,13 +124,13 @@ fun LoginScreen(navController: NavController) {
 
 
             // Mật khẩu
-            Text("Mật khẩu", fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
+            Text(stringResource(R.string.password), fontWeight = FontWeight.Bold, color = Color.DarkGray, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("••••••••") },
+                placeholder = { Text(stringResource(R.string.password_placeholder)) },
                 leadingIcon = { Icon(Icons.Default.Lock, null) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -148,7 +149,7 @@ fun LoginScreen(navController: NavController) {
                 onClick = { navController.navigate(AppRoutes.FORGOT_PASSWORD) },
                 modifier = Modifier.align(Alignment.End)
             ) {
-                Text("Quên mật khẩu?", color = Color.Gray)
+                Text(stringResource(R.string.forgot_password), color = Color.Gray)
             }
 
 
@@ -159,7 +160,7 @@ fun LoginScreen(navController: NavController) {
             Button(
                 onClick = {
                     if (email.trim().isBlank() || password.isBlank()) {
-                        Toast.makeText(context, "Vui lòng nhập đầy đủ email và mật khẩu", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, context.getString(R.string.please_enter_email_password), Toast.LENGTH_LONG).show()
                         return@Button
                     }
 
@@ -168,22 +169,22 @@ fun LoginScreen(navController: NavController) {
                     coroutineScope.launch {
                         try {
                             auth.signInWithEmailAndPassword(email.trim(), password).await()
-                            Toast.makeText(context, "Chào mừng trở lại!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.welcome_back), Toast.LENGTH_SHORT).show()
                             navigateToHome()
                         } catch (e: Exception) {
                             when (e) {
                                 is FirebaseAuthInvalidUserException -> {
                                     Toast.makeText(
                                         context,
-                                        "Email này chưa được đăng ký.\nVui lòng nhấn \"Đăng ký ngay\" để tạo tài khoản mới.",
+                                        context.getString(R.string.email_not_registered),
                                         Toast.LENGTH_LONG
                                     ).show()
                                 }
                                 is FirebaseAuthInvalidCredentialsException -> {
-                                    Toast.makeText(context, "Mật khẩu không đúng. Vui lòng thử lại.", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, context.getString(R.string.wrong_password), Toast.LENGTH_LONG).show()
                                 }
                                 else -> {
-                                    Toast.makeText(context, "Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, context.getString(R.string.connection_error), Toast.LENGTH_LONG).show()
                                 }
                             }
                         } finally {
@@ -199,9 +200,9 @@ fun LoginScreen(navController: NavController) {
                 if (isLoading) {
                     CircularProgressIndicator(color = Color.White, strokeWidth = 3.dp, modifier = Modifier.size(24.dp))
                     Spacer(Modifier.width(12.dp))
-                    Text("Đang đăng nhập...", color = Color.White, fontSize = 18.sp)
+                    Text(stringResource(R.string.logging_in), color = Color.White, fontSize = 18.sp)
                 } else {
-                    Text("Đăng nhập", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.login), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -209,7 +210,7 @@ fun LoginScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(32.dp))
 
 
-            Text("Hoặc", color = Color.Gray, fontSize = 14.sp)
+            Text(stringResource(R.string.or), color = Color.Gray, fontSize = 14.sp)
             Spacer(modifier = Modifier.height(16.dp))
 
 
@@ -222,10 +223,10 @@ fun LoginScreen(navController: NavController) {
                             .addOnCompleteListener { task ->
                                 isLoading = false
                                 if (task.isSuccessful) {
-                                    Toast.makeText(context, "Đăng nhập với tư cách khách", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.login_as_guest), Toast.LENGTH_SHORT).show()
                                     navigateToHome()
                                 } else {
-                                    Toast.makeText(context, "Lỗi kết nối, vui lòng thử lại", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.connection_error_retry), Toast.LENGTH_SHORT).show()
                                 }
                             }
                     },
@@ -245,9 +246,9 @@ fun LoginScreen(navController: NavController) {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Chưa có tài khoản? ", color = Color.Gray)
+                Text(stringResource(R.string.no_account), color = Color.Gray)
                 TextButton(onClick = { navController.navigate(AppRoutes.REGISTER) }) {
-                    Text("Đăng ký ngay", color = LoginButtonColor, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(stringResource(R.string.register_now), color = LoginButtonColor, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             }
 

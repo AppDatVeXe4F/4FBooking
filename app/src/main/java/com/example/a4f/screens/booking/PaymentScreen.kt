@@ -19,7 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.example.a4f.R
 import com.example.a4f.data.FirestoreRepository
 import kotlinx.coroutines.delay
 import java.text.NumberFormat
@@ -62,12 +64,12 @@ fun PaymentScreen(
         AlertDialog(
             onDismissRequest = { showCancelDialog = false },
             containerColor = Color.White,
-            title = { Text("Thông báo", fontWeight = FontWeight.Bold, fontSize = 18.sp) },
-            text = { Text("Bạn có chắc chắn muốn hủy thao tác này ?", fontSize = 16.sp) },
-            dismissButton = { TextButton(onClick = { showCancelDialog = false }) { Text("Hủy", color = Color.Gray) } },
+            title = { Text(stringResource(R.string.notification_title), fontWeight = FontWeight.Bold, fontSize = 18.sp) },
+            text = { Text(stringResource(R.string.confirm_cancel_action), fontSize = 16.sp) },
+            dismissButton = { TextButton(onClick = { showCancelDialog = false }) { Text(stringResource(R.string.cancel), color = Color.Gray) } },
             confirmButton = {
                 TextButton(onClick = { showCancelDialog = false; navController.popBackStack() }) {
-                    Text("Đồng ý", color = AppGreen, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.agree), color = AppGreen, fontWeight = FontWeight.Bold)
                 }
             }
         )
@@ -92,17 +94,17 @@ fun PaymentScreen(
         Column(modifier = Modifier.weight(1f).padding(16.dp)) {
             BookingStepperPayment()
             Spacer(modifier = Modifier.height(24.dp))
-            InfoTextRow("Họ và tên :", userName)
-            InfoTextRow("Số điện thoại :", userPhone)
-            InfoTextRow("Email :", userEmail)
+            InfoTextRow(stringResource(R.string.full_name_label), userName)
+            InfoTextRow(stringResource(R.string.phone_number_label), userPhone)
+            InfoTextRow(stringResource(R.string.email_label), userEmail)
             Spacer(modifier = Modifier.height(24.dp))
             Card(colors = CardDefaults.cardColors(containerColor = PaymentBoxBg), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    PaymentRow("Giá vé", "${formattedPrice}đ")
-                    PaymentRow("Phí thanh toán", "0đ")
+                    PaymentRow(stringResource(R.string.ticket_price), "${formattedPrice}đ")
+                    PaymentRow(stringResource(R.string.payment_fee), "0đ")
                     Spacer(modifier = Modifier.height(24.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
-                        Text("Thanh toán mặc định với", color = AppGreen, fontSize = 14.sp)
+                        Text(stringResource(R.string.default_payment_with), color = AppGreen, fontSize = 14.sp)
                         Text("${formattedPrice}đ", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, color = Color.Black)
                     }
                 }
@@ -111,7 +113,7 @@ fun PaymentScreen(
 
         // FOOTER (Nút Thanh Toán an toàn)
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Thời gian giữ vé còn lại $timeString", color = AppGreen, fontSize = 14.sp)
+            Text(text = stringResource(R.string.time_remaining, timeString), color = AppGreen, fontSize = 14.sp)
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
@@ -120,7 +122,7 @@ fun PaymentScreen(
                     try {
                         // 1. Kiểm tra dữ liệu đầu vào
                         if (tripId.isBlank()) {
-                            Toast.makeText(context, "Lỗi: Không tìm thấy mã chuyến xe!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.error_trip_not_found), Toast.LENGTH_SHORT).show()
                             return@Button // Dừng lại, không chạy tiếp
                         }
 
@@ -132,9 +134,9 @@ fun PaymentScreen(
                         navController.navigate("qr_code_screen/$totalPrice/$tripId")
 
                     } catch (e: NotImplementedError) {
-                        Toast.makeText(context, "Lỗi: Còn mã TODO chưa xóa trong code!", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, context.getString(R.string.error_todo), Toast.LENGTH_LONG).show()
                     } catch (e: Exception) {
-                        Toast.makeText(context, "Lỗi hệ thống: ${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, context.getString(R.string.error_system, e.message ?: ""), Toast.LENGTH_LONG).show()
                         e.printStackTrace()
                     }
                 },
@@ -142,7 +144,7 @@ fun PaymentScreen(
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("THANH TOÁN", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.payment_step), fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -168,15 +170,15 @@ fun PaymentRow(label: String, value: String) {
 @Composable
 fun BookingStepperPayment() {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-        Text("Thời gian", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.time), fontSize = 12.sp, fontWeight = FontWeight.Bold)
         Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-        Text("Chọn ghế", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.select_seat_step), fontSize = 12.sp, fontWeight = FontWeight.Bold)
         Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-        Text("Thông tin", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.information), fontSize = 12.sp, fontWeight = FontWeight.Bold)
         Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
         Surface(color = AppGreen, shape = RoundedCornerShape(20.dp), modifier = Modifier.height(28.dp)) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp)) {
-                Text("THANH TOÁN", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(stringResource(R.string.payment_step), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
     }

@@ -1,5 +1,222 @@
 <resources>
     <string name="app_name">4F</string>
-
     <string name="default_web_client_id">516167605895-c7npk5959fj5hn3h1v47kt179sd482lp.apps.googleusercontent.com</string>
+    
+    <!-- Profile Screen -->
+    <string name="notifications">Thông báo</string>
+    <string name="profile_and_settings">Hồ sơ và cài đặt</string>
+    <string name="support_center">Trung tâm hỗ trợ</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="vietnamese">Tiếng Việt</string>
+    <string name="english">English</string>
+    <string name="new_member">Thành viên Mới</string>
+    <string name="loading">Đang tải…</string>
+    <string name="guest">Khách</string>
+    
+    <!-- Profile Settings Screen -->
+    <string name="profile_and_settings_title">Hồ sơ và cài đặt</string>
+    <string name="full_name">Họ và tên *</string>
+    <string name="phone_number">Số điện thoại *</string>
+    <string name="email">Email *</string>
+    <string name="date_of_birth">Ngày sinh</string>
+    <string name="save_info">Lưu thông tin</string>
+    <string name="delete_account">Xóa tài khoản</string>
+    <string name="tap_to_change_photo">Chạm để thay đổi ảnh</string>
+    <string name="date_format_placeholder">dd/MM/yyyy</string>
+    <string name="info_security_message">Thông tin của bạn được bảo mật và chỉ dùng để xác minh tài khoản.</string>
+    <string name="order_info_message">Thông tin đơn hàng sẽ được gửi đến số điện thoại và email mà bạn cung cấp.</string>
+    <string name="please_login">Vui lòng đăng nhập</string>
+    <string name="please_enter_full_name">Vui lòng nhập họ và tên</string>
+    <string name="info_saved">Đã lưu thông tin</string>
+    <string name="error">Lỗi: %1$s</string>
+    <string name="feature_under_development">Chức năng đang phát triển</string>
+    <string name="saving">Đang lưu…</string>
+    
+    <!-- Support Center Screen -->
+    <string name="support_center_title">Trung tâm Hỗ trợ</string>
+    <string name="instructions">Hướng dẫn</string>
+    <string name="payment_instructions">Hướng dẫn thanh toán</string>
+    <string name="regulations">Quy chế</string>
+    <string name="faq">Câu hỏi thường gặp</string>
+    <string name="bus_contact_info">Thông tin liên hệ xe khách</string>
+    <string name="hotline">Hotline</string>
+    <string name="contact_via_email">Liên hệ qua email</string>
+    <string name="contact_via_social">Liên hệ qua mạng xã hội</string>
+    
+    <!-- Notifications Screen -->
+    <string name="notifications_title">Thông báo</string>
+    
+    <!-- My Tickets Screen -->
+    <string name="my_tickets">VÉ CỦA TÔI</string>
+    <string name="upcoming">Sắp tới</string>
+    <string name="today">Đã tới</string>
+    <string name="completed">Hoàn thành</string>
+    <string name="cancelled">Đã hủy</string>
+    
+    <!-- Home Screen -->
+    <string name="home">Trang chủ</string>
+    <string name="booking">Đặt vé</string>
+    <string name="my_tickets_tab">Vé của tôi</string>
+    <string name="profile">Cá nhân</string>
+    
+    <!-- My Tickets Screen -->
+    <string name="no_tickets">Không có vé nào.</string>
+    <string name="date">Ngày: %1$s</string>
+    <string name="seats">Ghế: %1$s</string>
+    <string name="total_price">Tổng tiền: %1$s VND</string>
+    
+    <!-- Ticket Detail Screen -->
+    <string name="ticket_not_found">Không tìm thấy vé</string>
+    <string name="ticket_detail">Chi tiết vé</string>
+    <string name="cancel_ticket">HỦY VÉ</string>
+    <string name="cancel_ticket_button">Hủy vé</string>
+    <string name="confirm_cancel_title">Xác nhận</string>
+    <string name="confirm_cancel_message">Bạn có chắc chắn muốn hủy vé này không?</string>
+    <string name="cancel_warning">Vé đã hủy không thể hoàn lại.</string>
+    <string name="show_qr_to_staff">ĐƯA MÃ NÀY CHO NHÂN VIÊN TRƯỚC KHI LÊN XE</string>
+    <string name="payment_status_paid">Đã thanh toán</string>
+    <string name="refund_info">Tiền của quý khách sẽ được hoàn trong 12h và phí là 10%.</string>
+    <string name="refund_amount">Số tiền quý khách nhận được: %1$s VND</string>
+    <string name="date_label">Ngày</string>
+    <string name="seats_label">Ghế</string>
+    <string name="total_price_label">Tổng tiền</string>
+    <string name="payment_status">Trạng thái thanh toán</string>
+    <string name="qr_code">QR Code</string>
+    
+    <!-- Profile Settings Screen -->
+    <string name="country_code">(+84)</string>
+    
+    <!-- Notifications Screen -->
+    <string name="notification_app_discount">APP 4F ĐẶT NHANH – GIẢM LIỀN!</string>
+    <string name="notification_online_promotion">KHUYẾN MÃI ONLINE</string>
+    <string name="notification_new_member_offer">ƯU ĐÃI ĐẶC BIỆT CHO THÀNH VIÊN MỚI</string>
+    <string name="notification_maintenance">THÔNG BÁO BẢO TRÌ HỆ THỐNG</string>
+    
+    <!-- Select Seat Screen -->
+    <string name="no_seat_selected">Chưa chọn ghế</string>
+    <string name="tickets_count">%1$d vé</string>
+    <string name="continue_button">Tiếp tục</string>
+    <string name="select_seat">CHỌN GHẾ</string>
+    <string name="time">Thời gian</string>
+    <string name="information">Thông tin</string>
+    <string name="payment">Thanh toán</string>
+    
+    <!-- Login Screen -->
+    <string name="welcome">Xin Chào, Quý Khách!</string>
+    <string name="password">Mật khẩu</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="login">Đăng nhập</string>
+    <string name="logging_in">Đang đăng nhập…</string>
+    <string name="welcome_back">Chào mừng trở lại!</string>
+    <string name="please_enter_email_password">Vui lòng nhập đầy đủ email và mật khẩu</string>
+    <string name="email_not_registered">Email này chưa được đăng ký.\nVui lòng nhấn \"Đăng ký ngay\" để tạo tài khoản mới.</string>
+    <string name="wrong_password">Mật khẩu không đúng. Vui lòng thử lại.</string>
+    <string name="connection_error">Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.</string>
+    <string name="login_as_guest">Đăng nhập với tư cách khách</string>
+    <string name="connection_error_retry">Lỗi kết nối, vui lòng thử lại</string>
+    <string name="no_account">Chưa có tài khoản? </string>
+    <string name="register_now">Đăng ký ngay</string>
+    <string name="or">Hoặc</string>
+    <string name="email_placeholder">yourname@gmail.com</string>
+    <string name="password_placeholder">••••••••</string>
+    
+    <!-- Ticket Detail Screen -->
+    <string name="confirm_cancel_message_detail">Bạn có chắc chắn muốn hủy vé này không?</string>
+    <string name="cancel_warning_detail">Vé đã hủy không thể hoàn lại.</string>
+    
+    <!-- Fill Info Screen -->
+    <string name="customer_info">Thông tin khách hàng</string>
+    <string name="pickup_dropoff_info">Thông tin đón trả</string>
+    <string name="pickup_point">Điểm đón</string>
+    <string name="dropoff_point">Điểm trả</string>
+    <string name="note">Lưu ý:</string>
+    <string name="pickup_note">Quý khách vui lòng có mặt tại %1$s trước %2$s %3$s để được kiểm tra thông tin trước khi lên xe.</string>
+    <string name="not_selected">Chưa chọn</string>
+    <string name="limousine">Limousine</string>
+    <string name="select_seat_step">Chọn ghế</string>
+    <string name="information_step">THÔNG TIN</string>
+    <string name="customer_info_title">Thông tin tin khách hàng</string>
+    <string name="name_label">Họ tên *</string>
+    <string name="phone_label">Số điện thoại *</string>
+    <string name="full_name_label">Họ và tên :</string>
+    <string name="phone_number_label">Số điện thoại :</string>
+    <string name="email_label">Email :</string>
+    
+    <!-- Payment Screen -->
+    <string name="notification_title">Thông báo</string>
+    <string name="confirm_cancel_action">Bạn có chắc chắn muốn hủy thao tác này ?</string>
+    <string name="agree">Đồng ý</string>
+    <string name="default_payment_with">Thanh toán mặc định với</string>
+    <string name="time_remaining">Thời gian giữ vé còn lại %1$s</string>
+    <string name="payment_step">THANH TOÁN</string>
+    <string name="error_trip_not_found">Lỗi: Không tìm thấy mã chuyến xe!</string>
+    <string name="error_todo">Lỗi: Còn mã TODO chưa xóa trong code!</string>
+    <string name="error_system">Lỗi hệ thống: %1$s</string>
+    <string name="ticket_price">Giá vé</string>
+    <string name="payment_fee">Phí thanh toán</string>
+    
+    <!-- Register Screen -->
+    <string name="register">Đăng ký</string>
+    <string name="creating_account">Đang tạo tài khoản…</string>
+    <string name="register_success">Đăng ký thành công! Chào mừng %1$s</string>
+    <string name="register_failed">Đăng ký thất bại: %1$s</string>
+    <string name="full_name_placeholder">Nguyễn Văn A</string>
+    <string name="password_requirements">Tối thiểu 8 ký tự, có số và ký tự đặc biệt</string>
+    <string name="please_enter_valid_email">Vui lòng nhập email hợp lệ</string>
+    <string name="please_enter_full_name_register">Vui lòng nhập họ và tên</string>
+    <string name="password_validation_error">Mật khẩu phải ≥ 8 ký tự, có chữ số và ký tự đặc biệt</string>
+    <string name="email_already_used">Email này đã được sử dụng. Vui lòng dùng email khác hoặc đăng nhập.</string>
+    <string name="password_too_weak">Mật khẩu quá yếu. Vui lòng thử lại.</string>
+    <string name="invalid_email_format">Email không hợp lệ. Vui lòng kiểm tra lại.</string>
+    <string name="cannot_get_user_info">Không thể lấy thông tin người dùng</string>
+    <string name="show_hide_password">Hiện/Ẩn mật khẩu</string>
+    
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_title">Quên mật khẩu</string>
+    <string name="forgot_password_description">Nhập email của bạn để nhận link đặt lại mật khẩu</string>
+    <string name="send_reset_link">Gửi link đặt lại</string>
+    <string name="sending">Đang gửi…</string>
+    <string name="reset_link_sent">Đã gửi link đặt lại mật khẩu!\nVui lòng kiểm tra email.</string>
+    
+    <!-- Home Screen -->
+    <string name="app_title">4F</string>
+    <string name="where_can_we_take_you">CHÚNG TÔI CÓ THỂ ĐƯA BẠN ĐẾN ĐÂU ?</string>
+    <string name="departure_point">Điểm đi</string>
+    <string name="arrival_point">Điểm đến</string>
+    <string name="lets_go">Đi thôi!!!!</string>
+    <string name="good_deals">DEAL HỜI GIÁ TỐT</string>
+    <string name="forgot_password_question">Quên mật khẩu?</string>
+    <string name="forgot_password_description_long">Đừng lo lắng! Chỉ cần nhập email bạn đã dùng để đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu ngay lập tức.</string>
+    <string name="please_enter_email">Vui lòng nhập email</string>
+    
+    <!-- Find Trip Screen -->
+    <string name="loading_trips">Đang tải…</string>
+    <string name="default_departure">BẾN XE MIỀN TÂY</string>
+    <string name="default_arrival">VP LONG XUYÊN</string>
+    <string name="no_trips_found">Không có chuyến nào!</string>
+    <string name="time_step">THỜI GIAN</string>
+    <string name="distance">Khoảng cách: %1$s</string>
+    <string name="seats_remaining">Còn %1$s chỗ</string>
+    <string name="price_filter">Giá</string>
+    <string name="seat_type_filter">Loại ghế</string>
+    <string name="time_filter">Giờ</string>
+    <string name="selected">Đã chọn</string>
+    <string name="default_sort">Mặc định</string>
+    <string name="all">Tất cả</string>
+    <string name="ascending">Tăng dần</string>
+    <string name="descending">Giảm dần</string>
+    <string name="bed_seat">Giường nằm</string>
+    <string name="morning_shift">Buổi sáng (06:00 - 12:00)</string>
+    <string name="afternoon_shift">Buổi chiều (12:00 - 18:00)</string>
+    <string name="evening_shift">Buổi tối (18:00 - 22:00)</string>
+    
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Hủy</string>
+    <string name="back">Quay lại</string>
+    <string name="save">Lưu</string>
+    <string name="edit">Chỉnh sửa</string>
+    <string name="delete">Xóa</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="close">Đóng</string>
 </resources>

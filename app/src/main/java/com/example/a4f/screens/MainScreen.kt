@@ -62,7 +62,7 @@ fun MainScreen(navController: NavHostController) {
                             }
                         },
                         icon = { Icon(item.icon, contentDescription = null) },
-                        label = { Text(item.title) }
+                        label = { Text(item.getTitle()) }
                     )
                 }
             }
@@ -97,7 +97,28 @@ fun MainScreen(navController: NavHostController) {
 
             // 4. Cá nhân
             composable(BottomNavItem.Profile.route) {
-                Box(Modifier.fillMaxSize(), Alignment.Center) { Text("Cá nhân", fontSize = 20.sp) }
+                ProfileScreen(
+                    navController = bottomNavController,
+                    mainNavController = navController
+                )
+            }
+
+            // Hồ sơ và cài đặt
+            composable("profile_settings") {
+                ProfileSettingsScreen(
+                    navController = bottomNavController,
+                    mainNavController = navController
+                )
+            }
+
+            // Trung tâm hỗ trợ
+            composable("support_center") {
+                SupportCenterScreen(navController = bottomNavController)
+            }
+
+            // Thông báo
+            composable("notifications") {
+                NotificationsScreen(navController = bottomNavController)
             }
 
             /** ---------- CHỨC NĂNG ĐẶT VÉ GIỮ NGUYÊN ---------- */

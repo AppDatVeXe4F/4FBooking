@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.example.a4f.R
 import java.text.SimpleDateFormat
@@ -72,7 +73,7 @@ fun FindTripScreen(
     // --- 1.  NGÀY THÁNG ---
     val dateListObj = remember(date) { generateNext7Days(date) }
     var selectedDateIndex by remember { mutableIntStateOf(0) }
-    val currentTopBarDate = dateListObj.getOrNull(selectedDateIndex)?.fullDateString ?: "Đang tải..."
+    val currentTopBarDate = dateListObj.getOrNull(selectedDateIndex)?.fullDateString ?: stringResource(R.string.loading_trips)
 
     // --- 2. DỮ LIỆU (6 CHUYẾN/NGÀY, KHÁC NHAU THEO NGÀY) ---
     val allTrips = remember(selectedDateIndex) {
@@ -80,30 +81,43 @@ fun FindTripScreen(
     }
 
     // --- 3. FILTER ---
-    var sortOption by remember { mutableStateOf("Mặc định") }
-    var seatFilter by remember { mutableStateOf("Tất cả") }
-    var timeFilter by remember { mutableStateOf("Tất cả") }
+    val defaultSort = stringResource(R.string.default_sort)
+    val allOption = stringResource(R.string.all)
+    val bedSeatStr = stringResource(R.string.bed_seat)
+    val limousineStr = stringResource(R.string.limousine)
+    val morningStr = stringResource(R.string.morning_shift)
+    val afternoonStr = stringResource(R.string.afternoon_shift)
+    val eveningStr = stringResource(R.string.evening_shift)
+    val ascendingStr = stringResource(R.string.ascending)
+    val descendingStr = stringResource(R.string.descending)
+    
+    var sortOption by remember { mutableStateOf(defaultSort) }
+    var seatFilter by remember { mutableStateOf(allOption) }
+    var timeFilter by remember { mutableStateOf(allOption) }
 
-    val filteredTrips = remember(allTrips, sortOption, seatFilter, timeFilter) {
+    val filteredTrips = remember(allTrips, sortOption, seatFilter, timeFilter, allOption, bedSeatStr, limousineStr, morningStr, afternoonStr, eveningStr, ascendingStr, descendingStr) {
         var result = allTrips
 
-        if (seatFilter != "Tất cả") {
-            result = result.filter { it.seatType == seatFilter }
+        if (seatFilter != allOption) {
+            result = result.filter { 
+                (seatFilter == bedSeatStr && it.seatType == "Giường nằm") || 
+                (seatFilter == limousineStr && it.seatType == "Limousine")
+            }
         }
-        if (timeFilter != "Tất cả") {
+        if (timeFilter != allOption) {
             result = result.filter { trip ->
                 val h = trip.startHour
                 when (timeFilter) {
-                    "Buổi sáng (06:00 - 12:00)" -> h in 6..11
-                    "Buổi chiều (12:00 - 18:00)" -> h in 12..17
-                    "Buổi tối (18:00 - 22:00)" -> h in 18..22
+                    morningStr -> h in 6..11
+                    afternoonStr -> h in 12..17
+                    eveningStr -> h in 18..22
                     else -> true
                 }
             }
         }
         when (sortOption) {
-            "Tăng dần" -> result.sortedBy { it.realPrice }
-            "Giảm dần" -> result.sortedByDescending { it.realPrice }
+            ascendingStr -> result.sortedBy { it.realPrice }
+            descendingStr -> result.sortedByDescending { it.realPrice }
             else -> result
         }
     }
@@ -114,11 +128,11 @@ fun FindTripScreen(
             Spacer(modifier = Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
             Box(modifier = Modifier.fillMaxWidth().height(56.dp)) {
                 IconButton(onClick = { navController.popBackStack() }, modifier = Modifier.align(Alignment.CenterStart)) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = AppWhite)
+                    Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = AppWhite)
                 }
                 Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "${source?.uppercase() ?: "BẾN XE MIỀN TÂY"} → ${destination?.uppercase() ?: "VP LONG XUYÊN"}",
+                        text = "${source?.uppercase() ?: stringResource(R.string.default_departure)} → ${destination?.uppercase() ?: stringResource(R.string.default_arrival)}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = AppWhite
@@ -166,7 +180,7 @@ fun FindTripScreen(
             ) {
                 if (filteredTrips.isEmpty()) {
                     item {
-                        Text("Không có chuyến nào!", modifier = Modifier.fillMaxWidth().padding(20.dp), textAlign = TextAlign.Center, color = Color.Gray)
+                        Text(stringResource(R.string.no_trips_found), modifier = Modifier.fillMaxWidth().padding(20.dp), textAlign = TextAlign.Center, color = Color.Gray)
                     }
                 } else {
                     items(filteredTrips) { trip ->
@@ -363,15 +377,15 @@ fun BookingStepperCustom() {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Surface(color = AppGreen, shape = RoundedCornerShape(20.dp), modifier = Modifier.height(32.dp)) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 16.dp)) {
-                    Text(text = "THỜI GIAN", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = AppWhite)
+                    Text(text = stringResource(R.string.time_step), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = AppWhite)
                 }
             }
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = AppDarkGray, modifier = Modifier.size(20.dp))
-            Text("Chọn ghế", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
+            Text(stringResource(R.string.select_seat_step), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Thông tin", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
+            Text(stringResource(R.string.information), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Thanh toán", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
+            Text(stringResource(R.string.payment), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
         }
         Spacer(Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -393,10 +407,45 @@ fun FilterBar(
     currentTime: String, onTimeSelected: (String) -> Unit
 ) {
     var expandedType by remember { mutableStateOf<String?>(null) }
+    val defaultSort = stringResource(R.string.default_sort)
+    val allStr = stringResource(R.string.all)
+    val priceLabel = stringResource(R.string.price_filter)
+    val seatTypeLabel = stringResource(R.string.seat_type_filter)
+    val timeLabel = stringResource(R.string.time_filter)
+    val selectedLabel = stringResource(R.string.selected)
+    val ascendingStr = stringResource(R.string.ascending)
+    val descendingStr = stringResource(R.string.descending)
+    val bedSeatStr = stringResource(R.string.bed_seat)
+    val limousineStr = stringResource(R.string.limousine)
+    val morningStr = stringResource(R.string.morning_shift)
+    val afternoonStr = stringResource(R.string.afternoon_shift)
+    val eveningStr = stringResource(R.string.evening_shift)
+    
     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        FilterChipWithMenu(if (currentSort == "Mặc định") "Giá" else "Giá...", listOf("Mặc định", "Tăng dần", "Giảm ần"), expandedType == "PRICE", currentSort != "Mặc định", { expandedType = if (it) "PRICE" else null }, { onSortSelected(it); expandedType = null })
-        FilterChipWithMenu(if (currentSeat == "Tất cả") "Loại ghế" else currentSeat, listOf("Tất cả", "Giường nằm", "Limousine"), expandedType == "SEAT", currentSeat != "Tất cả", { expandedType = if (it) "SEAT" else null }, { onSeatSelected(it); expandedType = null })
-        FilterChipWithMenu(if (currentTime == "Tất cả") "Giờ" else "Đã chọn", listOf("Tất cả", "Buổi sáng (06:00 - 12:00)", "Buổi chiều (12:00 - 18:00)", "Buổi tối (18:00 - 22:00)"), expandedType == "TIME", currentTime != "Tất cả", { expandedType = if (it) "TIME" else null }, { onTimeSelected(it); expandedType = null })
+        FilterChipWithMenu(
+            if (currentSort == defaultSort) priceLabel else "$priceLabel...", 
+            listOf(defaultSort, ascendingStr, descendingStr), 
+            expandedType == "PRICE", 
+            currentSort != defaultSort, 
+            { expandedType = if (it) "PRICE" else null }, 
+            { onSortSelected(it); expandedType = null }
+        )
+        FilterChipWithMenu(
+            if (currentSeat == allStr) seatTypeLabel else currentSeat, 
+            listOf(allStr, bedSeatStr, limousineStr), 
+            expandedType == "SEAT", 
+            currentSeat != allStr, 
+            { expandedType = if (it) "SEAT" else null }, 
+            { onSeatSelected(it); expandedType = null }
+        )
+        FilterChipWithMenu(
+            if (currentTime == allStr) timeLabel else selectedLabel, 
+            listOf(allStr, morningStr, afternoonStr, eveningStr), 
+            expandedType == "TIME", 
+            currentTime != allStr, 
+            { expandedType = if (it) "TIME" else null }, 
+            { onTimeSelected(it); expandedType = null }
+        )
     }
 }
 
@@ -502,7 +551,7 @@ fun TripCardItem(trip: Trip, onClick: () -> Unit) {
                             color = AppWhite
                         )
                         Text(
-                            text = "Khoảng cách: ${trip.distanceTime}",
+                            text = stringResource(R.string.distance, trip.distanceTime),
                             fontSize = 11.sp,
                             color = AppWhite.copy(alpha = 0.8f),
                             modifier = Modifier.padding(vertical = 4.dp)
@@ -558,7 +607,7 @@ fun TripCardItem(trip: Trip, onClick: () -> Unit) {
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "Còn ${String.format("%02d", trip.seatsAvailable)} chỗ",
+                            text = stringResource(R.string.seats_remaining, String.format("%02d", trip.seatsAvailable)),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = AppDarkGray

@@ -26,6 +26,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.example.a4f.R
 import com.example.a4f.ui.theme.LoginButtonColor
@@ -53,10 +54,10 @@ fun ForgotPasswordScreen(navController: NavController) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Quên mật khẩu", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.forgot_password_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, "Quay lại")
+                        Icon(Icons.Default.ArrowBack, stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
@@ -85,7 +86,7 @@ fun ForgotPasswordScreen(navController: NavController) {
 
 
             Text(
-                text = "Quên mật khẩu?",
+                text = stringResource(R.string.forgot_password_question),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = LoginButtonColor,
@@ -94,7 +95,7 @@ fun ForgotPasswordScreen(navController: NavController) {
 
 
             Text(
-                text = "Đừng lo lắng! Chỉ cần nhập email bạn đã dùng để đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu ngay lập tức.",
+                text = stringResource(R.string.forgot_password_description_long),
                 fontSize = 16.sp,
                 color = Color.Gray,
                 textAlign = TextAlign.Center,
@@ -106,7 +107,7 @@ fun ForgotPasswordScreen(navController: NavController) {
                 value = email,
                 onValueChange = { email = it; emailError = null },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("yourname@gmail.com") },
+                placeholder = { Text(stringResource(R.string.email_placeholder)) },
                 leadingIcon = { Icon(Icons.Default.Email, null) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -129,11 +130,11 @@ fun ForgotPasswordScreen(navController: NavController) {
                 onClick = {
                     val emailInput = email.trim().lowercase()
                     if (emailInput.isBlank()) {
-                        emailError = "Vui lòng nhập email"
+                        emailError = context.getString(R.string.please_enter_email)
                         return@Button
                     }
                     if (!android.util.Patterns.EMAIL_ADDRESS.matcher(emailInput).matches()) {
-                        emailError = "Email không hợp lệ"
+                        emailError = context.getString(R.string.invalid_email_format)
                         return@Button
                     }
 
@@ -142,10 +143,10 @@ fun ForgotPasswordScreen(navController: NavController) {
                     scope.launch {
                         try {
                             auth.sendPasswordResetEmail(emailInput).await()
-                            Toast.makeText(context, "Đã gửi link đặt lại mật khẩu!\nVui lòng kiểm tra email.", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, context.getString(R.string.reset_link_sent), Toast.LENGTH_LONG).show()
                             navController.popBackStack()
                         } catch (e: Exception) {
-                            emailError = "Email này chưa được đăng ký"
+                            emailError = context.getString(R.string.email_not_registered)
                         } finally {
                             isLoading = false
                         }
@@ -159,9 +160,9 @@ fun ForgotPasswordScreen(navController: NavController) {
                 if (isLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                     Spacer(Modifier.width(12.dp))
-                    Text("Đang gửi...")
+                    Text(stringResource(R.string.sending))
                 } else {
-                    Text("Gửi link đặt lại", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.send_reset_link), fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
             }
 

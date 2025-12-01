@@ -25,7 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.example.a4f.R
 import com.example.a4f.data.FirestoreService // Import Service
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -126,13 +128,13 @@ fun FillInfoScreen(
 
             // SECTION 1: THÔNG TIN KHÁCH HÀNG
             SectionTitle(
-                title = "Thông tin khách hàng",
+                title = stringResource(R.string.customer_info),
                 onEdit = { showEditDialog = true } //
             )
             Column(modifier = Modifier.padding(16.dp)) {
-                InfoRow(label = "Họ và tên :", value = userName)
-                InfoRow(label = "Số điện thoại :", value = userPhone)
-                InfoRow(label = "Email :", value = userEmail)
+                InfoRow(label = stringResource(R.string.full_name_label), value = userName)
+                InfoRow(label = stringResource(R.string.phone_number_label), value = userPhone)
+                InfoRow(label = stringResource(R.string.email_label), value = userEmail)
             }
 
             // SECTION 2 & 3 & FOOTER
@@ -149,14 +151,14 @@ fun FillInfoScreen(
                         Row(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(displayPrice, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                             Icon(Icons.Default.Circle, contentDescription = null, tint = AppGreen, modifier = Modifier.size(6.dp))
-                            Text("Limousine", color = Color.White, fontSize = 10.sp)
+                            Text(stringResource(R.string.limousine), color = Color.White, fontSize = 10.sp)
                         }
                     }
                     Card(colors = CardDefaults.cardColors(containerColor = TicketInfoBg), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth().height(31.dp)) {
                         Row(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Chair, contentDescription = null, tint = AppGreen, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(selectedSeats.ifEmpty { "Chưa chọn" }, color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text(selectedSeats.ifEmpty { stringResource(R.string.not_selected) }, color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                     }
                 }
@@ -164,16 +166,16 @@ fun FillInfoScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SectionTitle(title = "Thông tin đón trả", onEdit = null)
+            SectionTitle(title = stringResource(R.string.pickup_dropoff_info), onEdit = null)
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Điểm đón", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(stringResource(R.string.pickup_point), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
                 AddressBox(text = fullPickupAddress)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Lưu ý:", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                Text("Quý khách vui lòng có mặt tại $source trước $arrivalTime $displayDate để được kiểm tra thông tin trước khi lên xe.", color = AppGreen, fontSize = 13.sp, lineHeight = 18.sp)
+                Text(stringResource(R.string.note), color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text(stringResource(R.string.pickup_note, source ?: "", arrivalTime, displayDate), color = AppGreen, fontSize = 13.sp, lineHeight = 18.sp)
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Điểm trả", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(stringResource(R.string.dropoff_point), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
                 AddressBox(text = fullDropOffAddress)
             }
@@ -194,7 +196,7 @@ fun FillInfoScreen(
             modifier = Modifier.fillMaxWidth().height(50.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Tiếp tục", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.continue_button), fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.width(8.dp))
             Icon(Icons.Default.ArrowForward, contentDescription = null)
         }
@@ -241,17 +243,17 @@ fun AddressBox(text: String) {
 fun BookingStepperInfo() {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Thời gian", fontSize = 12.sp, color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.time), fontSize = 12.sp, color = Color.Black, fontWeight = FontWeight.Bold)
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-            Text("Chọn ghế", fontSize = 12.sp, color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.select_seat_step), fontSize = 12.sp, color = Color.Black, fontWeight = FontWeight.Bold)
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
             Surface(color = AppGreen, shape = RoundedCornerShape(20.dp), modifier = Modifier.height(28.dp)) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp)) {
-                    Text("THÔNG TIN", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(stringResource(R.string.information_step), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-            Text("Thanh toán", fontSize = 12.sp, color = Color.Gray)
+            Text(stringResource(R.string.payment), fontSize = 12.sp, color = Color.Gray)
         }
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -288,13 +290,13 @@ fun EditInfoDialog(
                     .background(SectionHeaderBg, RoundedCornerShape(8.dp))
                     .padding(8.dp)
             ) {
-                Text("Thông tin tin khách hàng", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(stringResource(R.string.customer_info_title), fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         },
         text = {
             Column {
                 // Họ tên
-                Text("Họ tên *", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(stringResource(R.string.name_label), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(4.dp))
                 OutlinedTextField(
                     value = name,
@@ -307,7 +309,7 @@ fun EditInfoDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Email
-                Text("Email *", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(stringResource(R.string.email), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(4.dp))
                 OutlinedTextField(
                     value = email,
