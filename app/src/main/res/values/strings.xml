@@ -175,6 +175,8 @@
     <string name="invalid_email_format">Email không hợp lệ. Vui lòng kiểm tra lại.</string>
     <string name="cannot_get_user_info">Không thể lấy thông tin người dùng</string>
     <string name="show_hide_password">Hiện/Ẩn mật khẩu</string>
+    <string name="show_password">Hiện mật khẩu</string>
+    <string name="hide_password">Ẩn mật khẩu</string>
     
     <!-- Forgot Password Screen -->
     <string name="forgot_password_title">Quên mật khẩu</string>

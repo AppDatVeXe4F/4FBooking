@@ -144,6 +144,8 @@
     <string name="invalid_email_format">Invalid email format. Please check again.</string>
     <string name="cannot_get_user_info">Cannot get user information</string>
     <string name="show_hide_password">Show/Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
     
     <!-- Forgot Password Screen -->
     <string name="forgot_password_title">Forgot Password</string>
