@@ -1,11 +1,13 @@
 package com.example.a4f.screens.booking
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -21,14 +23,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import com.example.a4f.R
-import com.example.a4f.data.FirestoreService // Import Service
+import com.example.a4f.data.FirestoreService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -50,15 +52,22 @@ fun FillInfoScreen(
     startTime: String,
     tripId: String
 ) {
-    val arrivalTime = calculateArrivalTime(startTime, -30)
+    val context = LocalContext.current // Để hiện Toast thông báo
+    val arrivalTimeForCheckIn = calculateArrivalTime(startTime, -30)
     val endTime = calculateArrivalTime(startTime, 240)
     val displayDate = date?.replace("-", "/") ?: ""
     val displayPrice = if (totalPrice > 0) "${totalPrice/1000}.000đ" else "0đ"
+
+    // State dữ liệu
     var userName by remember { mutableStateOf("Đang tải...") }
     var userPhone by remember { mutableStateOf("Đang tải...") }
     var userEmail by remember { mutableStateOf("Đang tải...") }
-    var fullPickupAddress by remember { mutableStateOf(source ?: "") }
-    var fullDropOffAddress by remember { mutableStateOf(destination ?: "") }
+
+    // State địa chỉ
+    var fullPickupAddress by remember { mutableStateOf(source ?: "Đang tải...") }
+    var fullDropOffAddress by remember { mutableStateOf(destination ?: "Đang tải...") }
+
+    // State Dialog
     var showEditDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -83,6 +92,7 @@ fun FillInfoScreen(
         if (destination != null) fullDropOffAddress = FirestoreService.getAddressByName(destination)
     }
 
+    // --- HIỂN THỊ DIALOG CHỈNH SỬA ---
     if (showEditDialog) {
         EditInfoDialog(
             currentName = userName,
@@ -90,6 +100,7 @@ fun FillInfoScreen(
             currentEmail = userEmail,
             onDismiss = { showEditDialog = false },
             onSave = { newName, newPhone, newEmail ->
+                // Lưu lên Firebase
                 val userId = FirebaseAuth.getInstance().currentUser?.uid
                 if (userId != null) {
                     val updates = mapOf(
@@ -98,6 +109,7 @@ fun FillInfoScreen(
                     )
                     FirebaseFirestore.getInstance().collection("users").document(userId).update(updates)
                 }
+                // Cập nhật UI
                 userName = newName
                 userPhone = newPhone
                 userEmail = newEmail
@@ -126,24 +138,21 @@ fun FillInfoScreen(
             BookingStepperInfo()
             Spacer(modifier = Modifier.height(16.dp))
 
-            // SECTION 1: THÔNG TIN KHÁCH HÀNG
-            SectionTitle(
-                title = stringResource(R.string.customer_info),
-                onEdit = { showEditDialog = true } //
-            )
+            // SECTION 1: KHÁCH HÀNG
+            SectionTitle(title = "Thông tin khách hàng", onEdit = { showEditDialog = true })
             Column(modifier = Modifier.padding(16.dp)) {
-                InfoRow(label = stringResource(R.string.full_name_label), value = userName)
-                InfoRow(label = stringResource(R.string.phone_number_label), value = userPhone)
-                InfoRow(label = stringResource(R.string.email_label), value = userEmail)
+                InfoRow(label = "Họ và tên :", value = userName)
+                InfoRow(label = "Số điện thoại :", value = userPhone)
+                InfoRow(label = "Email :", value = userEmail)
             }
 
-            // SECTION 2 & 3 & FOOTER
+            // SECTION 2: TÓM TẮT VÉ
             Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Card(colors = CardDefaults.cardColors(containerColor = TicketInfoBg), shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1.3f).height(70.dp)) {
                     Column(modifier = Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.Center) {
-                        Text("$startTime - $endTime", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text(text = "$startTime - $endTime", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         Spacer(modifier = Modifier.height(2.dp))
-                        Text("$source - $destination", color = Color.White, fontSize = 11.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 14.sp)
+                        Text(text = "$source - $destination", color = Color.White, fontSize = 11.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 14.sp)
                     }
                 }
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -151,14 +160,14 @@ fun FillInfoScreen(
                         Row(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(displayPrice, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                             Icon(Icons.Default.Circle, contentDescription = null, tint = AppGreen, modifier = Modifier.size(6.dp))
-                            Text(stringResource(R.string.limousine), color = Color.White, fontSize = 10.sp)
+                            Text("Limousine", color = Color.White, fontSize = 10.sp)
                         }
                     }
                     Card(colors = CardDefaults.cardColors(containerColor = TicketInfoBg), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth().height(31.dp)) {
                         Row(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Chair, contentDescription = null, tint = AppGreen, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(selectedSeats.ifEmpty { stringResource(R.string.not_selected) }, color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text(selectedSeats.ifEmpty { "Chưa chọn" }, color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                     }
                 }
@@ -166,16 +175,24 @@ fun FillInfoScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SectionTitle(title = stringResource(R.string.pickup_dropoff_info), onEdit = null)
+            // SECTION 3: THÔNG TIN ĐÓN TRẢ
+            SectionTitle(title = "Thông tin đón trả", onEdit = null)
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(stringResource(R.string.pickup_point), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("Điểm đón", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
                 AddressBox(text = fullPickupAddress)
+
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(stringResource(R.string.note), color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                Text(stringResource(R.string.pickup_note, source ?: "", arrivalTime, displayDate), color = AppGreen, fontSize = 13.sp, lineHeight = 18.sp)
+                Text("Lưu ý:", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text(
+                    text = "Quý khách vui lòng có mặt tại $source trước $arrivalTimeForCheckIn $displayDate để được kiểm tra thông tin trước khi lên xe.",
+                    color = AppGreen,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp
+                )
+
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(stringResource(R.string.dropoff_point), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("Điểm trả", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
                 AddressBox(text = fullDropOffAddress)
             }
@@ -187,22 +204,125 @@ fun FillInfoScreen(
     Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.BottomCenter) {
         Button(
             onClick = {
-                val safeSource = source ?: "TP. HCM"
-                val safeDest = destination ?: "AN GIANG"
-                val safeDate = date?.replace("/", "-") ?: ""
-                navController.navigate("payment_screen/$tripId/$selectedSeats/$totalPrice/$safeSource/$safeDest/$safeDate/$userName/$userPhone/$userEmail")
+                // --- 1. KIỂM TRA RỖNG ---
+                if (userName.isBlank() || userPhone.isBlank() || userEmail.isBlank() || userName == "Đang tải...") {
+                    Toast.makeText(context, "Bạn vui lòng nhập thông tin", Toast.LENGTH_SHORT).show()
+                } else {
+                    // --- 2. CHUYỂN MÀN HÌNH NẾU ĐỦ THÔNG TIN ---
+                    val safeSource = source ?: "TP. HCM"
+                    val safeDest = destination ?: "AN GIANG"
+                    val safeDate = date?.replace("/", "-") ?: ""
+
+                    navController.navigate("payment_screen/$tripId/$selectedSeats/$totalPrice/$safeSource/$safeDest/$safeDate/$userName/$userPhone/$userEmail")
+                }
             },
             colors = ButtonDefaults.buttonColors(containerColor = AppGreen),
             modifier = Modifier.fillMaxWidth().height(50.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(stringResource(R.string.continue_button), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text("Tiếp tục", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.width(8.dp))
             Icon(Icons.Default.ArrowForward, contentDescription = null)
         }
     }
 }
 
+// --- DIALOG CHỈNH SỬA (CÓ KIỂM TRA SĐT) ---
+@Composable
+fun EditInfoDialog(
+    currentName: String,
+    currentPhone: String,
+    currentEmail: String,
+    onDismiss: () -> Unit,
+    onSave: (String, String, String) -> Unit
+) {
+    var name by remember { mutableStateOf(if (currentName == "Đang tải...") "" else currentName) }
+    var phone by remember { mutableStateOf(if (currentPhone == "Đang tải...") "" else currentPhone) }
+    var email by remember { mutableStateOf(if (currentEmail == "Đang tải...") "" else currentEmail) }
+
+    // Biến lưu trạng thái lỗi SĐT
+    var isPhoneError by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        title = {
+            Box(modifier = Modifier.fillMaxWidth().background(SectionHeaderBg, RoundedCornerShape(8.dp)).padding(8.dp)) {
+                Text("Thông tin khách hàng", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+        },
+        text = {
+            Column {
+                Text("Họ tên *", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = name, onValueChange = { name = it },
+                    modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp),
+                    trailingIcon = { Icon(Icons.Default.Close, null, Modifier.clickable { name = "" }) }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text("Email *", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = email, onValueChange = { email = it },
+                    modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp),
+                    trailingIcon = { Icon(Icons.Default.Close, null, Modifier.clickable { email = "" }) }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // --- Ô NHẬP SĐT (CÓ KIỂM TRA) ---
+                Text("Số điện thoại *", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { input ->
+                        // Chỉ cho phép nhập số
+                        if (input.all { it.isDigit() }) {
+                            phone = input
+                            isPhoneError = false
+                        } else {
+                            // Nếu nhập chữ -> Báo lỗi ngay
+                            isPhoneError = true
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), // Bàn phím số
+                    isError = isPhoneError, // Hiện viền đỏ
+                    trailingIcon = { Icon(Icons.Default.Close, null, Modifier.clickable { phone = "" }) }
+                )
+                // Thông báo lỗi màu đỏ
+                if (isPhoneError) {
+                    Text("Số điện thoại chưa hợp lệ", color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp, top = 2.dp))
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    // Kiểm tra lần cuối trước khi Lưu
+                    if (phone.length < 10 || !phone.all { it.isDigit() }) {
+                        isPhoneError = true
+                    } else {
+                        onSave(name, phone, email)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = AppGreen),
+                modifier = Modifier.fillMaxWidth().height(45.dp),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Lưu", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = Color.White)
+            }
+        }
+    )
+}
+
+// ... (Các hàm hỗ trợ calculateArrivalTime, SectionTitle, InfoRow, AddressBox, BookingStepperInfo giữ nguyên như cũ) ...
 fun calculateArrivalTime(time: String, minuteOffset: Int): String {
     return try {
         val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -243,17 +363,17 @@ fun AddressBox(text: String) {
 fun BookingStepperInfo() {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(stringResource(R.string.time), fontSize = 12.sp, color = Color.Black, fontWeight = FontWeight.Bold)
+            Text("Thời gian", fontSize = 12.sp, color = Color.Black, fontWeight = FontWeight.Bold)
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-            Text(stringResource(R.string.select_seat_step), fontSize = 12.sp, color = Color.Black, fontWeight = FontWeight.Bold)
+            Text("Chọn ghế", fontSize = 12.sp, color = Color.Black, fontWeight = FontWeight.Bold)
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
             Surface(color = AppGreen, shape = RoundedCornerShape(20.dp), modifier = Modifier.height(28.dp)) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp)) {
-                    Text(stringResource(R.string.information_step), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text("THÔNG TIN", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-            Text(stringResource(R.string.payment), fontSize = 12.sp, color = Color.Gray)
+            Text("Thanh toán", fontSize = 12.sp, color = Color.Gray)
         }
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -266,84 +386,4 @@ fun BookingStepperInfo() {
             Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(AppLightGreen))
         }
     }
-}
-
-@Composable
-fun EditInfoDialog(
-    currentName: String,
-    currentPhone: String,
-    currentEmail: String,
-    onDismiss: () -> Unit,
-    onSave: (String, String, String) -> Unit
-) {
-    var name by remember { mutableStateOf(currentName) }
-    var phone by remember { mutableStateOf(currentPhone) }
-    var email by remember { mutableStateOf(currentEmail) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = Color.White,
-        title = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(SectionHeaderBg, RoundedCornerShape(8.dp))
-                    .padding(8.dp)
-            ) {
-                Text(stringResource(R.string.customer_info_title), fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
-        },
-        text = {
-            Column {
-                // Họ tên
-                Text(stringResource(R.string.name_label), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Spacer(modifier = Modifier.height(4.dp))
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    modifier = Modifier.fillMaxWidth().background(Color(0xFFF0F0F0), RoundedCornerShape(8.dp)),
-                    shape = RoundedCornerShape(8.dp),
-                    trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.clickable { name = "" }) }
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Email
-                Text(stringResource(R.string.email), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Spacer(modifier = Modifier.height(4.dp))
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    modifier = Modifier.fillMaxWidth().background(Color(0xFFF0F0F0), RoundedCornerShape(8.dp)),
-                    shape = RoundedCornerShape(8.dp),
-                    trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.clickable { email = "" }) }
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Số điện thoại
-                Text("Số điện thoại *", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Spacer(modifier = Modifier.height(4.dp))
-                OutlinedTextField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    modifier = Modifier.fillMaxWidth().background(Color(0xFFF0F0F0), RoundedCornerShape(8.dp)),
-                    shape = RoundedCornerShape(8.dp),
-                    trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.clickable { phone = "" }) }
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onSave(name, phone, email) },
-                colors = ButtonDefaults.buttonColors(containerColor = AppGreen),
-                modifier = Modifier.fillMaxWidth().height(45.dp),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text("Lưu", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = Color.White)
-            }
-        }
-    )
 }
