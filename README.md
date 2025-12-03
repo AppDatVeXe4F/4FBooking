@@ -2,6 +2,9 @@
 
 Ứng dụng di động đặt vé xe buýt hiện đại được xây dựng bằng Kotlin và Jetpack Compose, tích hợp với Firebase để quản lý người dùng và dữ liệu.
 
+<h3>Quét mã QR để trải nghiệm ứng dụng</h3>
+<img src="https://github.com/AppDatVeXe4F/4FBooking/blob/main/maqr_app.png?raw=true" alt="QR Code" width="250">
+
 ## 📱 Giới thiệu
 
 4FBooking là ứng dụng đặt vé xe buýt trực tuyến, cho phép người dùng tìm kiếm, đặt chỗ và quản lý vé xe một cách dễ dàng. Ứng dụng hỗ trợ đa ngôn ngữ (Tiếng Việt và Tiếng Anh) với giao diện người dùng hiện đại và thân thiện.
