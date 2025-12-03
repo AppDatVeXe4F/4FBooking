@@ -90,7 +90,7 @@ fun MainScreen(navController: NavHostController) {
                 )
             }
 
-            // ⭐ 3. Tab Vé của tôi
+            //  3. Tab Vé của tôi
             composable(BottomNavItem.MyTickets.route) {
                 MyTicketsScreen(navController = navController)
             }

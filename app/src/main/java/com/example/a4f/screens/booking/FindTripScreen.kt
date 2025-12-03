@@ -75,9 +75,24 @@ fun FindTripScreen(
     var selectedDateIndex by remember { mutableIntStateOf(0) }
     val currentTopBarDate = dateListObj.getOrNull(selectedDateIndex)?.fullDateString ?: stringResource(R.string.loading_trips)
 
-    // --- 2. DỮ LIỆU (6 CHUYẾN/NGÀY, KHÁC NHAU THEO NGÀY) ---
-    val allTrips = remember(selectedDateIndex) {
-        generateMockTripsForDate(selectedDateIndex, source, destination)
+    // --- 2. DỮ LIỆU (lấy từ Firestore) ---
+    val tripsState = produceState(initialValue = emptyList<com.example.a4f.data.FirestoreRepository.TripModel>(), key1 = selectedDateIndex, key2 = source, key3 = destination) {
+        val queryDate = dateListObj.getOrNull(selectedDateIndex)?.shortDate
+        value = com.example.a4f.data.FirestoreRepository.getTrips(source, destination, queryDate)
+    }
+
+    val allTrips = tripsState.value.map { tm ->
+        Trip(
+            id = tm.id,
+            startTime = tm.startTime,
+            startStation = tm.startStation,
+            endTime = tm.endTime,
+            endStation = tm.endStation,
+            distanceTime = tm.distanceTime,
+            price = if (tm.price > 0) "${tm.price}đ" else "0đ",
+            seatsAvailable = tm.seatsAvailable,
+            seatType = tm.seatType
+        )
     }
 
     // --- 3. FILTER ---
