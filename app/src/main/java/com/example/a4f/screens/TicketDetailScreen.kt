@@ -161,7 +161,8 @@ fun TicketDetailScreen(
                         Divider(color = Color(0xFF49736E).copy(alpha = 0.4f), thickness = 1.dp)
 
                         val textColor = Color(0xFF1B4F4A)
-                        TicketInfoRow(stringResource(R.string.date_label), ticket.bookedAt?.toDate()?.let { dateFormat.format(it) } ?: "-", textColor)
+                        TicketInfoRow(stringResource(R.string.date_label), ticket.tripDate?.toDate()?.let { dateFormat.format(it) } ?: "-", textColor)
+                        TicketInfoRow("Tuyến", "${ticket.source} ➜ ${ticket.destination}", textColor, bold = true)
                         TicketInfoRow(stringResource(R.string.seats_label), ticket.seatNumber.joinToString(", "), textColor)
                         TicketInfoRow(stringResource(R.string.total_price_label), "${ticket.totalPrice} VND", textColor, bold = true)
 
@@ -186,7 +187,7 @@ fun TicketDetailScreen(
 
             // Dialog xác nhận hủy vé
             if (showCancelDialog) {
-                val refundAmount = ticket.totalPrice * 0.9 // Hoàn 90% vì phí 10%
+                val refundAmount = ticket.totalPrice * 0.98 // Hoàn 98% vì phí 2%
                 AlertDialog(
                     onDismissRequest = { showCancelDialog = false },
                     title = { Text("Xác nhận", fontWeight = FontWeight.Bold, fontSize = 18.sp) },
@@ -198,7 +199,7 @@ fun TicketDetailScreen(
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                "Tiền của quý khách sẽ được hoàn trong 12h và phí là 10%.",
+                                "Tiền của quý khách sẽ được hoàn trong 12h và phí là 2%.",
                                 fontSize = 16.sp,
                                 color = Color.Red,
                                 fontWeight = FontWeight.Bold
@@ -214,9 +215,13 @@ fun TicketDetailScreen(
                     },
                     confirmButton = {
                         TextButton(onClick = {
-                            viewModel.cancelTicket(ticket.id)
+                            // 1. Hủy vé
+                            viewModel.cancelTicket(ticket)
+                            // 2. Chuyển sang tab Cancelled
                             viewModel.setSelectedTab(3)
+                            // 3. Đóng dialog
                             showCancelDialog = false
+                            // 4. Quay lại màn hình trước
                             navController.popBackStack()
                         }) {
                             Text("Hủy vé", color = Color.Red, fontWeight = FontWeight.Bold)

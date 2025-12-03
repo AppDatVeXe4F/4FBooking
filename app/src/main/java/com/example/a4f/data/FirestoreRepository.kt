@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.DocumentReference
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.Timestamp
 
 object FirestoreRepository {
     private val db = FirebaseFirestore.getInstance()
@@ -158,13 +159,16 @@ object FirestoreRepository {
     }
 
     suspend fun bookSeats(
-        tripId: String, 
-        newSeats: List<String>, 
+        tripId: String,
+        newSeats: List<String>,
         totalPrice: Int,
         source: String? = null,
-        destination: String? = null
+        destination: String? = null,
+        status: String = "confirmed"  // ← Thêm tham số status với giá trị mặc định
     ) {
-        // 1. Ghế đã đặt trong trip
+        val tripDoc = db.collection("trips").document(tripId).get().await()
+        val arrivalTime = tripDoc.getTimestamp("arrivalTime") ?: Timestamp.now()  // ngày khởi hành
+        // 1. Cập nhật ghế đã đặt trong trip
         db.collection("trips").document(tripId)
             .update("bookedSeats", FieldValue.arrayUnion(*newSeats.toTypedArray()))
             .await()
@@ -173,21 +177,17 @@ object FirestoreRepository {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
         val bookingData = hashMapOf(
             "bookedAt" to FieldValue.serverTimestamp(),
+            "tripDate" to arrivalTime, // <--- lưu ngày khởi hành
             "seatNumber" to newSeats,
             "totalPrice" to totalPrice,
-            "status" to "confirmed",
+            "status" to status,  // ← Sử dụng status truyền vào
             "tripId" to tripId,
             "userId" to userId
         )
+        if (source != null) bookingData["source"] = source
+        if (destination != null) bookingData["destination"] = destination
 
-        if (source != null) {
-            bookingData["source"] = source
-        }
-        if (destination != null) {
-            bookingData["destination"] = destination
-        }
-        
-        // 3. Lưu booking và await để đảm bảo hoàn thành trước khi tiếp tục
+        // 3. Lưu booking
         db.collection("bookings").add(bookingData).await()
     }
 }

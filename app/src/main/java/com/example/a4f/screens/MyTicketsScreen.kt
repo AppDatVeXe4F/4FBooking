@@ -50,22 +50,17 @@ fun MyTicketsScreen(
     val today = truncateTime(Date())
 
     val filteredTickets = tickets.filter { ticket ->
-        val statusLower = ticket.status.lowercase()
-        if (statusLower == "cancelled") {
-            selectedTab == 3
-        } else {
-            ticket.bookedAt?.toDate()?.let { date ->
-                val ticketDate = truncateTime(date)
-                when (selectedTab) {
-                    0 -> ticketDate.after(today)       // Sắp tới
-                    1 -> ticketDate == today           // Đã tới
-                    2 -> ticketDate.before(today)      // Hoàn thành
-                    else -> false
-                }
-            } ?: false
+        val todayMillis = truncateTime(Date()).time
+        val ticketDateMillis = ticket.tripDate?.toDate()?.let { truncateTime(it).time } ?: -1L
+        val ticketStatus = ticket.status.lowercase()
+        when (selectedTab) {
+            0 -> ticket.status.lowercase() == "upcoming" && ticketDateMillis > todayMillis
+            1 -> ticket.status.lowercase() == "today" && ticketDateMillis == todayMillis
+            2 -> ticket.status.lowercase() == "completed" && ticketDateMillis < todayMillis
+            3 -> ticket.status.lowercase() == "cancelled"
+            else -> false
         }
     }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -179,9 +174,10 @@ fun TicketCard(ticket: Ticket, onClick: () -> Unit) {
                 Divider(color = Color(0xFF49736E).copy(alpha = 0.4f), thickness = 1.dp)
 
                 val textColor = Color(0xFF1B4F4A)
-                Text(stringResource(R.string.date, ticket.bookedAt?.toDate()?.let { dateFormat.format(it) } ?: "-"), color = textColor, fontSize = 15.sp, fontWeight = FontWeight.Medium)
-                Text(stringResource(R.string.seats, ticket.seatNumber.joinToString(", ")), color = textColor, fontSize = 15.sp)
-                Text(stringResource(R.string.total_price, ticket.totalPrice.toString()), color = textColor, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                Text("Ngày: ${ticket.tripDate?.toDate()?.let { dateFormat.format(it) } ?: "-"}", color = textColor, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+                Text("Tuyến: ${ticket.source} ➜ ${ticket.destination}", color = textColor, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+                Text("Ghế: ${ticket.seatNumber.joinToString(", ")}", color = textColor, fontSize = 15.sp)
+                Text("Tổng tiền: ${ticket.totalPrice}", color = textColor, fontSize = 15.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

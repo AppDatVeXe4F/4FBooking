@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.*
+import com.google.firebase.firestore.FieldValue
+
 
 class TicketListViewModel : ViewModel() {
 
@@ -55,17 +57,19 @@ class TicketListViewModel : ViewModel() {
                     val isPaid = doc.getBoolean("isPaid") ?: false
                     val tripId = doc.getString("tripId") ?: ""
 
+                    val tripDateValue = doc.getTimestamp("tripDate")?.toDate()
                     val status = when {
                         statusFromDb.lowercase() == "cancelled" -> "cancelled"
-                        bookedAtDate == null -> statusFromDb
-                        truncateTime(bookedAtDate).after(today) -> "upcoming"
-                        truncateTime(bookedAtDate) == today -> "today"
+                        tripDateValue == null -> statusFromDb
+                        truncateTime(tripDateValue).after(today) -> "upcoming"
+                        truncateTime(tripDateValue) == today -> "today"
                         else -> "completed"
                     }
 
                     Ticket(
                         id = doc.id,
                         bookedAt = doc.getTimestamp("bookedAt"),
+                        tripDate = doc.getTimestamp("tripDate"),
                         seatNumber = seats,
                         status = status,
                         totalPrice = price,
@@ -108,24 +112,37 @@ class TicketListViewModel : ViewModel() {
             }
         }
     }
-    fun cancelTicket(ticketId: String) {
+    fun cancelTicket(ticket: Ticket) {
         viewModelScope.launch {
             try {
-                // Cập nhật status trên Firestore
-                db.collection("bookings").document(ticketId)
+                val tripId = ticket.trip
+                val seatsToRelease = ticket.seatNumber.toTypedArray()
+
+                // 1. Cập nhật status trên Firestore
+                db.collection("bookings").document(ticket.id)
                     .update("status", "cancelled")
                     .await()
 
-                // Cập nhật local state
-                _tickets.value = _tickets.value.map { t ->
-                    if (t.id == ticketId) t.copy(status = "cancelled") else t
+                // 2. Xóa ghế đã đặt khỏi trip
+                tripId?.let { id ->
+                    if (seatsToRelease.isNotEmpty()) {
+                        db.collection("trips").document(id)
+                            .update("bookedSeats", FieldValue.arrayRemove(*seatsToRelease))
+                            .await()
+                    }
                 }
 
-                Log.d("TicketViewModel", "Ticket $ticketId đã được hủy.")
+                // 3. Cập nhật local state
+                _tickets.value = _tickets.value.map { t ->
+                    if (t.id == ticket.id) t.copy(status = "cancelled") else t
+                }
+
+                Log.d("TicketViewModel", "Ticket ${ticket.id} đã được hủy và ghế đã trả về chuyến.")
             } catch (e: Exception) {
                 Log.e("TicketViewModel", "Lỗi khi hủy vé: ${e.message}", e)
             }
         }
     }
+
 
 }
