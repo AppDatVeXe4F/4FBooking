@@ -16,7 +16,7 @@ object FirestoreService {
         }
     }
 
-    // --- HÀM MỚI: LẤY ĐỊA CHỈ CỤ THỂ TỪ TÊN ---
+    // --- LẤY ĐỊA CHỈ CỤ THỂ TỪ TÊN ---
     suspend fun getAddressByName(locationName: String): String {
         return try {
             val snapshot = db.collection("locations")
@@ -25,14 +25,13 @@ object FirestoreService {
                 .await()
 
             if (!snapshot.isEmpty) {
-                // Lấy trường "address" của kết quả đầu tiên tìm được
                 val address = snapshot.documents[0].getString("address") ?: ""
                 if (address.isNotEmpty()) "$locationName: $address" else locationName
             } else {
-                locationName // Không tìm thấy thì trả về tên gốc
+                locationName
             }
         } catch (e: Exception) {
-            locationName // Lỗi thì trả về tên gốc
+            locationName
         }
     }
 }

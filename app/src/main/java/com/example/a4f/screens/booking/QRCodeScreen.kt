@@ -38,8 +38,8 @@ fun QRCodeScreen(
     val context = LocalContext.current
     val formattedPrice = NumberFormat.getNumberInstance(Locale("vi", "VN")).format(totalPrice)
 
-    // --- 1. LOGIC ĐẾM NGƯỢC (MỚI THÊM) ---
-    var timeLeft by remember { mutableIntStateOf(600) } // 600 giây = 10 phút
+    // --- 1. LOGIC ĐẾM NGƯỢC  ---
+    var timeLeft by remember { mutableIntStateOf(600) }
     LaunchedEffect(Unit) {
         while (timeLeft > 0) {
             delay(1000L)
@@ -78,9 +78,8 @@ fun QRCodeScreen(
             }
         }
 
-        // BODY & FOOTER (Dùng Box để ghim nút xuống đáy)
+        // BODY & FOOTER
         Box(modifier = Modifier.weight(1f)) {
-            // Nội dung cuộn
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -104,7 +103,7 @@ fun QRCodeScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // --- 2. HIỂN THỊ THỜI GIAN ĐẾM NGƯỢC (MỚI THÊM) ---
+                // --- 2. HIỂN THỊ THỜI GIAN ĐẾM NGƯỢC  ---
                 Text(
                     text = "Thời gian quét mã còn $timeString",
                     color = Color(0xFF4DB6AC), // Màu xanh ngọc giống hình
@@ -133,11 +132,10 @@ fun QRCodeScreen(
                     InstructionRow("4", "Nhấn vào Tải ảnh QR và chọn mã QR thanh toán đã lưu về máy")
                 }
 
-                // Khoảng trống cuối cùng để nội dung không bị nút che
                 Spacer(modifier = Modifier.height(100.dp))
             }
 
-            // --- 3. NÚT GHIM CỨNG Ở ĐÁY (ĐẢM BẢO KHÔNG BỊ MẤT) ---
+            // --- 3. NÚT GHIM CỨNG Ở ĐÁY ---
             Button(
                 onClick = {
                     navController.navigate(BottomNavItem.Home.route) {
@@ -147,7 +145,7 @@ fun QRCodeScreen(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = AppGreen),
                 modifier = Modifier
-                    .align(Alignment.BottomCenter) // Ghim xuống đáy
+                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .padding(16.dp)
                     .height(50.dp),

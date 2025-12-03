@@ -134,8 +134,8 @@ fun ProfileSettingsScreen(
             try {
                 val userData = hashMapOf(
                     "fullName" to fullName.trim(),
-                    "phoneNumber" to phone.trim(), // Lưu dưới tên phoneNumber để nhất quán với FillInfoScreen
-                    "phone" to phone.trim(), // Cũng lưu dưới tên phone để tương thích với dữ liệu cũ
+                    "phoneNumber" to phone.trim(),
+                    "phone" to phone.trim(),
                     "email" to email.trim()
                 )
                 

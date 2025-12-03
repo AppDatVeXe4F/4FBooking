@@ -92,7 +92,7 @@ fun FillInfoScreen(
         if (destination != null) fullDropOffAddress = FirestoreService.getAddressByName(destination)
     }
 
-    // --- HIỂN THỊ DIALOG CHỈNH SỬA ---
+    // --- DIALOG CHỈNH SỬA ---
     if (showEditDialog) {
         EditInfoDialog(
             currentName = userName,
@@ -208,7 +208,7 @@ fun FillInfoScreen(
                 if (userName.isBlank() || userPhone.isBlank() || userEmail.isBlank() || userName == "Đang tải...") {
                     Toast.makeText(context, "Bạn vui lòng nhập thông tin", Toast.LENGTH_SHORT).show()
                 } else {
-                    // --- 2. CHUYỂN MÀN HÌNH NẾU ĐỦ THÔNG TIN ---
+                    // --- 2. CHUYỂN MÀN HÌNH KHI ĐỦ THÔNG TIN ---
                     val safeSource = source ?: "TP. HCM"
                     val safeDest = destination ?: "AN GIANG"
                     val safeDate = date?.replace("/", "-") ?: ""
@@ -227,7 +227,7 @@ fun FillInfoScreen(
     }
 }
 
-// --- DIALOG CHỈNH SỬA (CÓ KIỂM TRA SĐT) ---
+// --- DIALOG CHỈNH SỬA  ---
 @Composable
 fun EditInfoDialog(
     currentName: String,
@@ -273,7 +273,7 @@ fun EditInfoDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // --- Ô NHẬP SĐT (CÓ KIỂM TRA) ---
+                // --- Ô NHẬP SĐT ---
                 Text("Số điện thoại *", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(4.dp))
                 OutlinedTextField(
@@ -294,7 +294,6 @@ fun EditInfoDialog(
                     isError = isPhoneError, // Hiện viền đỏ
                     trailingIcon = { Icon(Icons.Default.Close, null, Modifier.clickable { phone = "" }) }
                 )
-                // Thông báo lỗi màu đỏ
                 if (isPhoneError) {
                     Text("Số điện thoại chưa hợp lệ", color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp, top = 2.dp))
                 }
@@ -303,7 +302,6 @@ fun EditInfoDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    // Kiểm tra lần cuối trước khi Lưu
                     if (phone.length < 10 || !phone.all { it.isDigit() }) {
                         isPhoneError = true
                     } else {
@@ -322,7 +320,6 @@ fun EditInfoDialog(
     )
 }
 
-// ... (Các hàm hỗ trợ calculateArrivalTime, SectionTitle, InfoRow, AddressBox, BookingStepperInfo giữ nguyên như cũ) ...
 fun calculateArrivalTime(time: String, minuteOffset: Int): String {
     return try {
         val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())

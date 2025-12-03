@@ -10,15 +10,12 @@ import kotlinx.coroutines.tasks.await
 object FirestoreRepository {
     private val db = FirebaseFirestore.getInstance()
 
-    // --- HÀM MỚI: LẮNG NGHE DỮ LIỆU REAL-TIME ---
-    // Hàm này sẽ tự động chạy mỗi khi Firebase có thay đổi
+    // --- DỮ LIỆU REAL-TIME ---
     fun listenToTripUpdates(
         tripId: String,
-        onUpdate: (List<String>, Int) -> Unit // Callback trả về danh sách ghế và giá
+        onUpdate: (List<String>, Int) -> Unit
     ): ListenerRegistration {
         val docRef = db.collection("trips").document(tripId)
-
-        // addSnapshotListener: Là "cái ăng-ten" thu sóng từ Firebase
         return docRef.addSnapshotListener { snapshot, e ->
             if (e != null) {
                 Log.e("Firestore", "Lỗi lắng nghe: ${e.message}")
@@ -29,21 +26,16 @@ object FirestoreRepository {
                 // 1. Lấy danh sách ghế đã bán mới nhất
                 val bookedSeats = snapshot.get("bookedSeats") as? List<String> ?: emptyList()
 
-                // 2. Lấy giá vé (Logic nhảy bảng như cũ)
+                // 2. Lấy giá vé
                 val busTypePath = snapshot.getString("busType")
                 var price = 0
 
-                // Lưu ý: Việc lấy giá vé liên kết bảng trong Realtime hơi phức tạp nên ta sẽ xử lý riêng.
-                // Ở đây tạm thời ta trả về dữ liệu ghế trước để tô màu đỏ ngay lập tức.
-                // Để lấy giá vé realtime, ta cần 1 query riêng hoặc lưu giá trực tiếp vào trip.
-                // Cách đơn giản nhất cho bài này: Lấy giá 1 lần, còn ghế thì lắng nghe liên tục.
-
-                onUpdate(bookedSeats, 0) // Tạm thời trả về 0 giá, sẽ xử lý giá ở logic riêng
+                onUpdate(bookedSeats, 0)
             }
         }
     }
 
-    // Hàm lấy giá vé (Chạy 1 lần thôi vì giá ít khi đổi)
+    // Hàm lấy giá vé
     suspend fun getTripPrice(tripId: String): Int {
         return try {
             val tripDoc = db.collection("trips").document(tripId).get().await()
@@ -56,7 +48,6 @@ object FirestoreRepository {
         } catch (e: Exception) { 0 }
     }
 
-    // Hàm đặt vé - Chuyển thành suspend function để await
     suspend fun bookSeats(
         tripId: String, 
         newSeats: List<String>, 
@@ -64,7 +55,7 @@ object FirestoreRepository {
         source: String? = null,
         destination: String? = null
     ) {
-        // 1. Cập nhật ghế đã đặt trong trip
+        // 1. Ghế đã đặt trong trip
         db.collection("trips").document(tripId)
             .update("bookedSeats", FieldValue.arrayUnion(*newSeats.toTypedArray()))
             .await()
@@ -79,8 +70,7 @@ object FirestoreRepository {
             "tripId" to tripId,
             "userId" to userId
         )
-        
-        // Thêm source và destination nếu có
+
         if (source != null) {
             bookingData["source"] = source
         }

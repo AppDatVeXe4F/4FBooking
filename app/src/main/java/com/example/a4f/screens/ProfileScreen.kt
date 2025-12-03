@@ -156,18 +156,6 @@ fun ProfileScreen(
                             color = Color.White
                         )
                     }
-
-                    // Edit icon - màu trắng
-                    IconButton(onClick = {
-                        // TODO: Navigate to edit profile
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Profile",
-                            tint = Color.White,
-                            modifier = Modifier.size(26.dp)
-                        )
-                    }
                 }
             }
 
@@ -221,7 +209,6 @@ fun ProfileScreen(
                     title = stringResource(R.string.logout),
                     onClick = {
                         FirebaseAuth.getInstance().signOut()
-                        // Dùng mainNavController để navigate về login nếu có, nếu không dùng navController
                         val controller = mainNavController ?: navController
                         controller.navigate(AppRoutes.LOGIN) {
                             popUpTo(0) { inclusive = true }
@@ -248,7 +235,7 @@ fun ProfileMenuItem(
             .padding(horizontal = 16.dp, vertical = 18.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Icon với background tròn cho Info icon (Trung tâm hỗ trợ)
+        // Icon với background tròn cho Info icon
         if (isInfoIcon) {
             Box(
                 modifier = Modifier
@@ -343,8 +330,8 @@ fun LanguageOption(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .background(
-                if (isSelected) Color(0xFFEEF5F4) // Màu xám nhạt khi được chọn
-                else Color.White // Màu trắng khi không chọn
+                if (isSelected) Color(0xFFEEF5F4)
+                else Color.White
             )
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 14.dp),
@@ -364,7 +351,7 @@ fun LanguageOption(
                 text = label,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF49736E) // Màu teal-green đồng nhất cho cả hai
+                color = Color(0xFF49736E)
             )
         }
     }

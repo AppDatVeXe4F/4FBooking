@@ -114,7 +114,7 @@ fun OnboardingScreen(navController: NavController) {
 
 
 
-// Composable riêng cho thanh điều khiển
+// Composable thanh điều khiển
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BottomControls(

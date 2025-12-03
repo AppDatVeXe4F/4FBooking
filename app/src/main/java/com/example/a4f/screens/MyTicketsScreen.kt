@@ -37,7 +37,6 @@ fun MyTicketsScreen(
     val tickets by viewModel.tickets.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsState()
 
-    // Refresh tickets khi màn hình được hiển thị lại
     LaunchedEffect(Unit) {
         viewModel.refreshTickets()
     }
@@ -53,7 +52,7 @@ fun MyTicketsScreen(
     val filteredTickets = tickets.filter { ticket ->
         val statusLower = ticket.status.lowercase()
         if (statusLower == "cancelled") {
-            selectedTab == 3 // Chỉ hiển thị tab "Đã hủy"
+            selectedTab == 3
         } else {
             ticket.bookedAt?.toDate()?.let { date ->
                 val ticketDate = truncateTime(date)
@@ -161,7 +160,7 @@ fun TicketCard(ticket: Ticket, onClick: () -> Unit) {
                                     "upcoming" -> Color(0xFF2E7D32)
                                     "today" -> Color(0xFF1976D2)
                                     "completed" -> Color.Gray
-                                    "cancelled" -> Color(0xFFFF4444)  // màu đỏ cho vé đã hủy
+                                    "cancelled" -> Color(0xFFFF4444)
                                     else -> Color.Gray
                                 }
                             )

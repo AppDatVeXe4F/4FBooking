@@ -90,7 +90,7 @@ fun MainScreen(navController: NavHostController) {
                 )
             }
 
-            // ⭐ 3. Tab Vé của tôi (MỚI)
+            // ⭐ 3. Tab Vé của tôi
             composable(BottomNavItem.MyTickets.route) {
                 MyTicketsScreen(navController = navController)
             }
@@ -120,8 +120,6 @@ fun MainScreen(navController: NavHostController) {
             composable("notifications") {
                 NotificationsScreen(navController = bottomNavController)
             }
-
-            /** ---------- CHỨC NĂNG ĐẶT VÉ GIỮ NGUYÊN ---------- */
 
             // Chọn ghế
             composable(
@@ -211,8 +209,6 @@ fun MainScreen(navController: NavHostController) {
                 val totalPrice = backStackEntry.arguments?.getInt("totalPrice") ?: 0
                 val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
 
-                // Gọi màn hình QRCodeScreen
-                // Nếu báo đỏ chữ QRCodeScreen, hãy trỏ chuột vào và bấm Alt+Enter để Import
                 com.example.a4f.screens.booking.QRCodeScreen(
                     navController = bottomNavController,
                     totalPrice = totalPrice,

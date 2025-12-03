@@ -30,11 +30,11 @@ fun AppNavigation() {
         composable(AppRoutes.ONBOARDING) { OnboardingScreen(navController) }
         composable(AppRoutes.LOGIN) { LoginScreen(navController) }
         composable(AppRoutes.REGISTER) { RegisterScreen(navController) }
-        composable(AppRoutes.HOME) { MainScreen(navController = navController) } // Truyền navController gốc
+        composable(AppRoutes.HOME) { MainScreen(navController = navController) }
         composable(AppRoutes.FORGOT_PASSWORD) { ForgotPasswordScreen(navController) }
 
         composable(AppRoutes.MY_TICKETS) {
-            MyTicketsScreen(navController = navController) // navController chính
+            MyTicketsScreen(navController = navController)
         }
 
         composable("${AppRoutes.TICKET_DETAIL}/{ticketId}") { backStackEntry ->

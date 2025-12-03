@@ -122,7 +122,7 @@ fun PaymentScreen(
 
             Button(
                 onClick = {
-                    if (isProcessing) return@Button // Tránh click nhiều lần
+                    if (isProcessing) return@Button
                     
                     // --- BỌC AN TOÀN CHỐNG SẬP APP ---
                     coroutineScope.launch {

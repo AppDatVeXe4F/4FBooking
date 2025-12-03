@@ -320,8 +320,6 @@ fun generateNext7Days(startDateString: String?): List<DateUIModel> {
     for (i in 0 until 7) {
         var dayName = dayOfWeekFormat.format(cal.time).replace("Th ", "Th ")
         if (dayName.contains("CN") || dayName.contains("Chủ Nhật")) dayName = "CN"
-
-        // Chỉnh lại tên thứ cho giống hình (Th 2, Th 3...)
         if (dayName.startsWith("t")) dayName = dayName.replace("t", "Th ")
         if (dayName.startsWith("T")) dayName = dayName.replace("T", "Th ").replace("Th h", "Th ")
 
@@ -497,7 +495,7 @@ fun TripCardItem(trip: Trip, onClick: () -> Unit) {
                     text = trip.endTime,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFFFFE0E0) // Màu hơi hồng nhạt giống hình mẫu
+                    color = Color(0xFFFFE0E0)
                 )
             }
 
@@ -514,7 +512,7 @@ fun TripCardItem(trip: Trip, onClick: () -> Unit) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
-                            .padding(top = 6.dp) // Căn chỉnh cho ngang với dòng chữ đầu
+                            .padding(top = 6.dp)
                             .width(16.dp)
                     ) {
                         Box(

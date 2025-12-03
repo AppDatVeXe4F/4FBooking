@@ -58,7 +58,6 @@ fun SelectSeatScreen(
     DisposableEffect(tripId) {
         // 1. Bật chế độ lắng nghe ghế
         val listener = FirestoreRepository.listenToTripUpdates(tripId) { newBookedSeats, _ ->
-            // Khi Firebase đổi, biến này cập nhật -> Màn hình tự vẽ lại -> Ghế chuyển đỏ
             soldSeatsList = newBookedSeats
         }
 
@@ -75,7 +74,7 @@ fun SelectSeatScreen(
     }
     // ------------------------------------------------
 
-    // Logic tính tiền
+    // Tính tiền
     val totalPrice = selectedSeats.size * realPrice
 
     // Tạo ghế dựa trên danh sách soldSeatsList
@@ -132,7 +131,7 @@ fun SelectSeatScreen(
                 val dest = destination ?: "AN GIANG"
                 val dateStr = date?.replace("/", "-") ?: "28-09-2025"
 
-                // 3. Chuyển màn hình kèm theo dữ liệu + THÊM TRIP ID VÀO CUỐI
+                // 3. Dữ liệu + TRIP ID VÀO CUỐI
                 navController.navigate(
                     "fill_info_screen/${selectedSeats.joinToString(",")}/$totalPrice/$source/$destination/$date/$startTime/$tripId"
                 )
